@@ -1,0 +1,2294 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AutoFlow PRO | Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<style>
+:root{
+  --teal:#00897b;--teal-light:#26a69a;--teal-dark:#00695c;
+  --teal-ghost:rgba(0,137,123,0.08);--teal-glow:rgba(0,137,123,0.25);
+  --sidebar-bg:#0f1923;--body-bg:#f0f4f7;
+  --surface:#fff;--surface-2:#f8fafb;--border:#e2e8f0;
+  --text-primary:#0d1b2a;--text-secondary:#64748b;--text-muted:#94a3b8;
+  --danger:#ef4444;--warning:#f59e0b;--success:#10b981;--info:#3b82f6;
+  --radius:14px;--shadow:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.05);
+  --shadow-md:0 4px 24px rgba(0,0,0,.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'DM Sans',sans-serif;background:var(--body-bg);color:var(--text-primary);display:flex;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{width:240px;min-height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:200;border-right:1px solid rgba(255,255,255,.04);}
+.sidebar-brand{padding:24px 20px 20px;border-bottom:1px solid rgba(255,255,255,.05);display:flex;align-items:center;gap:10px;}
+.brand-icon{width:32px;height:32px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;}
+.brand-icon svg{width:18px;height:18px;stroke:white;stroke-width:1.5;fill:none;}
+.brand-name{font-size:15px;font-weight:700;color:#fff;letter-spacing:-.3px;}
+.brand-name span{color:var(--teal-light);}
+.sidebar-nav{padding:16px 12px;flex:1;overflow-y:auto;}
+.nav-section-label{font-size:10px;font-weight:600;color:rgba(255,255,255,.25);letter-spacing:1.2px;text-transform:uppercase;padding:0 8px;margin:16px 0 6px;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;color:rgba(255,255,255,.45);font-size:13.5px;font-weight:500;cursor:pointer;transition:all .18s;margin-bottom:2px;border:none;background:none;width:100%;text-align:left;}
+.nav-item:hover{color:rgba(255,255,255,.85);background:rgba(255,255,255,.05);}
+.nav-item.active{color:#fff;background:rgba(0,137,123,.18);border-left:3px solid var(--teal);padding-left:9px;}
+.nav-item i{width:16px;font-size:13px;opacity:.8;}
+.nav-item.active i{opacity:1;color:var(--teal-light);}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:2px 6px;border-radius:10px;}
+/* MANAGER-ONLY nav items */
+.nav-item.manager-only{color:rgba(251,191,36,.55);}
+.nav-item.manager-only:hover{color:rgba(251,191,36,.9);background:rgba(251,191,36,.07);}
+.nav-item.manager-only.active{color:#fbbf24;background:rgba(251,191,36,.1);border-left-color:#fbbf24;}
+.nav-item.manager-only i{color:rgba(251,191,36,.6);}
+.nav-item.manager-only.active i{color:#fbbf24;}
+.sidebar-footer{padding:16px 12px;border-top:1px solid rgba(255,255,255,.05);}
+.user-card{display:flex;align-items:center;gap:10px;padding:8px;border-radius:8px;}
+.user-avatar{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--teal),var(--teal-dark));display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#fff;}
+.user-name{font-size:12.5px;font-weight:600;color:#fff;}
+.user-role{font-size:11px;color:rgba(255,255,255,.35);}
+
+/* MAIN */
+.main{margin-left:240px;flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 28px;height:60px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.topbar-left{display:flex;align-items:center;gap:16px;}
+.page-title{font-size:16px;font-weight:700;color:var(--text-primary);letter-spacing:-.3px;}
+.topbar-actions{display:flex;align-items:center;gap:8px;}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all .18s;font-family:inherit;}
+.btn-primary{background:var(--teal);color:#fff;}
+.btn-primary:hover{background:var(--teal-dark);transform:translateY(-1px);box-shadow:0 4px 12px var(--teal-glow);}
+.btn-ghost{background:transparent;color:var(--text-secondary);border:1px solid var(--border);}
+.btn-ghost:hover{background:var(--surface-2);color:var(--text-primary);}
+.btn-success{background:var(--success);color:#fff;}
+.btn-success:hover{background:#059669;}
+.btn-sm{padding:6px 12px;font-size:12px;}
+.btn-xs{padding:4px 8px;font-size:11px;}
+.topbar-divider{width:1px;height:22px;background:var(--border);}
+
+/* CONTENT */
+.content{padding:24px 28px;flex:1;}
+.view{display:none;animation:fadeUp .25s ease;}
+.view.active{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px;}
+.kpi-card{background:var(--surface);border-radius:var(--radius);padding:20px 22px;box-shadow:var(--shadow);border:1px solid var(--border);position:relative;overflow:hidden;}
+.kpi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--teal);border-radius:var(--radius) var(--radius) 0 0;}
+.kpi-card.danger::before{background:var(--danger);}
+.kpi-card.warning::before{background:var(--warning);}
+.kpi-card.info::before{background:var(--info);}
+.kpi-label{font-size:11.5px;font-weight:600;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px;}
+.kpi-value{font-size:26px;font-weight:700;color:var(--text-primary);letter-spacing:-1px;line-height:1;}
+.kpi-value.danger{color:var(--danger);}
+.kpi-sub{font-size:12px;color:var(--text-muted);margin-top:8px;display:flex;align-items:center;gap:5px;}
+.kpi-sub .up{color:var(--success);font-weight:600;}
+.kpi-sub .down{color:var(--danger);font-weight:600;}
+.kpi-icon{position:absolute;right:20px;top:20px;width:36px;height:36px;border-radius:8px;background:var(--teal-ghost);display:flex;align-items:center;justify-content:center;color:var(--teal);font-size:14px;}
+.kpi-card.danger .kpi-icon{background:rgba(239,68,68,.07);color:var(--danger);}
+.kpi-card.warning .kpi-icon{background:rgba(245,158,11,.07);color:var(--warning);}
+.kpi-card.info .kpi-icon{background:rgba(59,130,246,.07);color:var(--info);}
+
+/* GUARDIAO */
+.guardiao-banner{background:linear-gradient(135deg,#00897b,#00695c);border-radius:var(--radius);padding:18px 22px;margin-bottom:20px;display:flex;align-items:center;gap:16px;color:#fff;box-shadow:0 4px 20px var(--teal-glow);}
+.guardiao-icon{width:42px;height:42px;background:rgba(255,255,255,.15);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.guardiao-title{font-size:13px;font-weight:700;opacity:.7;margin-bottom:4px;text-transform:uppercase;letter-spacing:.3px;}
+.guardiao-text{font-size:14px;line-height:1.5;opacity:.95;}
+.guardiao-actions{margin-left:auto;flex-shrink:0;}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+.grid-3-1{display:grid;grid-template-columns:2fr 1fr;gap:16px;margin-bottom:20px;}
+
+/* CARD */
+.card{background:var(--surface);border-radius:var(--radius);box-shadow:var(--shadow);border:1px solid var(--border);}
+.card-header{padding:18px 22px 0;display:flex;align-items:center;justify-content:space-between;}
+.card-title{font-size:13.5px;font-weight:700;color:var(--text-primary);}
+.card-body{padding:18px 22px;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;}
+thead th{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.7px;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+tbody td{padding:10px 14px;font-size:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:var(--surface-2);}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:700;}
+.badge-success{background:rgba(16,185,129,.1);color:#059669;}
+.badge-danger{background:rgba(239,68,68,.1);color:var(--danger);}
+.badge-warning{background:rgba(245,158,11,.1);color:#d97706;}
+.badge-info{background:rgba(59,130,246,.1);color:#2563eb;}
+.badge-neutral{background:var(--surface-2);color:var(--text-secondary);border:1px solid var(--border);}
+.badge-purple{background:rgba(139,92,246,.1);color:#7c3aed;}
+.manager-badge{background:rgba(251,191,36,.15);color:#d97706;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:700;letter-spacing:.3px;}
+
+/* SELLERS */
+.seller-item{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border);}
+.seller-item:last-child{border-bottom:none;}
+.seller-rank{width:22px;height:22px;border-radius:6px;background:var(--surface-2);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);flex-shrink:0;}
+.seller-rank.gold{background:rgba(245,158,11,.12);color:#d97706;}
+.seller-rank.silver{background:rgba(148,163,184,.15);color:#64748b;}
+.seller-rank.bronze{background:rgba(180,120,80,.12);color:#92400e;}
+.seller-info{flex:1;}
+.seller-name{font-size:13px;font-weight:600;}
+.seller-bar-wrap{height:4px;background:var(--border);border-radius:2px;margin-top:5px;}
+.seller-bar{height:4px;border-radius:2px;background:var(--teal);}
+.seller-value{font-size:13px;font-weight:700;color:var(--text-primary);font-family:'DM Mono',monospace;}
+
+/* LOG */
+.log-item{padding:14px 0;border-bottom:1px solid var(--border);display:flex;gap:14px;}
+.log-item:last-child{border-bottom:none;}
+.log-dot-wrap{display:flex;flex-direction:column;align-items:center;padding-top:3px;}
+.log-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.log-dot.anomaly{background:var(--danger);box-shadow:0 0 0 3px rgba(239,68,68,.15);}
+.log-dot.warning{background:var(--warning);box-shadow:0 0 0 3px rgba(245,158,11,.15);}
+.log-dot.info{background:var(--info);box-shadow:0 0 0 3px rgba(59,130,246,.15);}
+.log-line{flex:1;width:1px;background:var(--border);margin-top:6px;}
+.log-content{flex:1;}
+.log-meta{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px;}
+.log-event{font-size:13px;font-weight:600;}
+.log-time{font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace;}
+.log-desc{font-size:12.5px;color:var(--text-secondary);line-height:1.5;}
+
+/* ORDER QUEUE */
+.order-grid-wrap{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;}
+.order-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);border-top-width:4px;padding:16px;box-shadow:var(--shadow);}
+.order-card.urgent{border-top-color:var(--danger);animation:pulseBorder 2s infinite;}
+.order-card.warn{border-top-color:var(--warning);}
+.order-card.ok{border-top-color:var(--success);}
+@keyframes pulseBorder{0%,100%{opacity:1}50%{opacity:.75}}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;}
+.order-id{font-size:14px;font-weight:700;}
+.order-seller{font-size:11px;color:var(--text-muted);}
+.order-timer{font-size:12px;font-weight:700;font-family:'DM Mono',monospace;}
+.order-timer.urgent{color:var(--danger);}
+.order-timer.warn{color:var(--warning);}
+.order-timer.ok{color:var(--success);}
+.order-items{font-size:12.5px;color:var(--text-secondary);line-height:1.8;margin-bottom:12px;min-height:52px;}
+.order-footer{display:flex;justify-content:space-between;align-items:center;}
+.btn-complete{background:var(--success);color:#fff;padding:6px 14px;border-radius:6px;font-size:12px;font-weight:700;border:none;cursor:pointer;font-family:inherit;transition:all .18s;}
+.btn-complete:hover{background:#059669;transform:translateY(-1px);}
+
+/* COMMISSION */
+.commission-hero{background:linear-gradient(135deg,#0f1923,#162030);border-radius:var(--radius);padding:32px;text-align:center;color:#fff;margin-bottom:20px;}
+.commission-amount{font-size:52px;font-weight:700;color:var(--teal-light);letter-spacing:-2px;font-family:'DM Mono',monospace;}
+.commission-label{font-size:13px;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;}
+.commission-month{font-size:14px;color:rgba(255,255,255,.5);margin-top:6px;}
+.commission-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;}
+.commission-mini{background:var(--surface);border-radius:var(--radius);padding:18px;border:1px solid var(--border);box-shadow:var(--shadow);}
+.commission-mini-label{font-size:11px;color:var(--text-muted);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.commission-mini-value{font-size:22px;font-weight:700;color:var(--text-primary);font-family:'DM Mono',monospace;}
+
+/* PDV */
+.pdv-grid{display:grid;grid-template-columns:1fr 360px;gap:16px;}
+.search-wrap{position:relative;flex:1;}
+.search-input{width:100%;height:40px;border:1px solid var(--border);border-radius:8px;padding:0 14px 0 38px;font-size:13.5px;font-family:inherit;color:var(--text-primary);background:var(--surface);outline:none;transition:all .18s;}
+.search-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-ghost);}
+.search-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);font-size:13px;}
+
+/* META BAR (PDV) */
+.meta-bar-pdv{background:linear-gradient(135deg,#0f1923,#162030);border-radius:var(--radius);padding:14px 22px;margin-bottom:16px;display:flex;align-items:center;gap:24px;}
+.meta-bar-pdv-label{font-size:11px;color:rgba(255,255,255,.4);font-weight:600;text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.meta-bar-pdv-value{font-size:26px;font-weight:700;color:var(--teal-light);font-family:'DM Mono',monospace;letter-spacing:-1px;}
+.meta-bar-pdv-progress{flex:1;}
+.meta-bar-pdv-top{display:flex;justify-content:space-between;font-size:12px;color:rgba(255,255,255,.4);margin-bottom:6px;}
+.meta-bar-pdv-wrap{height:8px;background:rgba(255,255,255,.08);border-radius:4px;overflow:hidden;}
+.meta-bar-pdv-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--teal),var(--teal-light));width:0%;transition:width 1.2s cubic-bezier(.34,1.56,.64,1);}
+
+/* CART */
+.cart-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:32px 20px;color:var(--text-muted);}
+.cart-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);}
+.cart-item:last-child{border-bottom:none;}
+.cart-item-info{flex:1;min-width:0;}
+.cart-item-name{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.cart-item-ref{font-size:10.5px;color:var(--text-muted);}
+.cart-item-price{font-size:12.5px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap;}
+.cart-item-remove{width:20px;height:20px;border-radius:4px;border:none;background:rgba(239,68,68,.08);color:var(--danger);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.qty-control{display:flex;align-items:center;gap:4px;}
+.qty-btn{width:20px;height:20px;border-radius:4px;border:1px solid var(--border);background:var(--surface-2);cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:var(--text-secondary);}
+.qty-val{font-size:12px;font-weight:700;width:18px;text-align:center;font-family:'DM Mono',monospace;}
+.cart-total{display:flex;justify-content:space-between;padding:10px 0 0;border-top:1px solid var(--border);margin-top:4px;}
+.cart-total-label{font-size:14px;font-weight:600;}
+.cart-total-value{font-size:20px;font-weight:700;color:var(--teal);font-family:'DM Mono',monospace;}
+.btn-lost{background:rgba(239,68,68,.07);color:var(--danger);border:1px solid rgba(239,68,68,.2);padding:4px 9px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .18s;}
+.btn-lost:hover{background:rgba(239,68,68,.12);}
+
+/* SELLER SELECTOR */
+.seller-selector{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:12px;}
+.seller-selector-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.seller-chips{display:flex;flex-wrap:wrap;gap:6px;}
+.seller-chip{padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text-secondary);transition:all .15s;}
+.seller-chip:hover{border-color:var(--teal);color:var(--teal);}
+.seller-chip.selected{background:var(--teal);color:#fff;border-color:var(--teal);}
+
+/* MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{background:var(--surface);border-radius:18px;width:640px;max-width:92vw;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,.2);animation:slideUp .25s ease;}
+.modal.modal-lg{width:860px;}
+.modal.modal-sm{width:480px;}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.modal-header{padding:20px 24px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);}
+.modal-title{font-size:15px;font-weight:700;}
+.modal-close{width:30px;height:30px;border-radius:7px;border:none;background:var(--surface-2);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text-secondary);font-size:13px;}
+.modal-close:hover{background:var(--border);}
+.modal-body{padding:22px 24px;overflow-y:auto;flex:1;}
+.modal-footer{padding:16px 24px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:10px;}
+
+/* COMMISSION POP-UP */
+.comm-popup{background:linear-gradient(135deg,#0f1923,#162030);border-radius:18px;width:460px;max-width:92vw;box-shadow:0 24px 80px rgba(0,0,0,.3);animation:slideUp .25s ease;}
+.comm-popup-header{padding:20px 24px 0;display:flex;justify-content:space-between;align-items:center;}
+.comm-popup-close{width:30px;height:30px;border-radius:7px;border:none;background:rgba(255,255,255,.1);cursor:pointer;color:rgba(255,255,255,.6);font-size:13px;display:flex;align-items:center;justify-content:center;}
+.comm-popup-close:hover{background:rgba(255,255,255,.2);}
+.comm-popup-body{padding:20px 24px 28px;}
+.comm-popup-name{font-size:13px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.8px;margin-bottom:4px;}
+.comm-popup-amount{font-size:54px;font-weight:700;color:var(--teal-light);font-family:'DM Mono',monospace;letter-spacing:-2px;line-height:1;}
+.comm-popup-sub{font-size:13px;color:rgba(255,255,255,.4);margin-top:4px;margin-bottom:20px;}
+.comm-popup-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px;}
+.comm-popup-stat{background:rgba(255,255,255,.05);border-radius:10px;padding:12px;}
+.comm-popup-stat-label{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+.comm-popup-stat-value{font-size:18px;font-weight:700;color:#fff;font-family:'DM Mono',monospace;}
+.comm-popup-progress-label{font-size:11px;color:rgba(255,255,255,.35);display:flex;justify-content:space-between;margin-bottom:6px;}
+.comm-popup-progress-bar{height:10px;background:rgba(255,255,255,.08);border-radius:5px;overflow:hidden;}
+.comm-popup-progress-fill{height:100%;border-radius:5px;background:linear-gradient(90deg,var(--teal),var(--teal-light));transition:width .8s ease;}
+
+/* SAVED QUOTES VIEW */
+.quote-card{background:var(--surface);border-radius:var(--radius);border:1px solid var(--border);padding:16px;box-shadow:var(--shadow);margin-bottom:12px;}
+.quote-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;}
+.quote-id{font-size:14px;font-weight:700;}
+.quote-seller{display:inline-flex;align-items:center;gap:5px;background:var(--teal-ghost);color:var(--teal);border-radius:6px;padding:3px 9px;font-size:11.5px;font-weight:600;}
+.quote-items{font-size:12.5px;color:var(--text-secondary);line-height:1.7;margin-bottom:12px;}
+.quote-footer{display:flex;justify-content:space-between;align-items:center;}
+.quote-total{font-size:16px;font-weight:700;font-family:'DM Mono',monospace;}
+.quote-time{font-size:11px;color:var(--text-muted);}
+
+/* FORMS */
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:36px;text-align:center;transition:all .2s;cursor:pointer;}
+.upload-zone:hover{border-color:var(--teal);background:var(--teal-ghost);}
+.upload-zone i{font-size:36px;color:var(--text-muted);margin-bottom:12px;display:block;}
+.upload-zone h5{font-size:14px;font-weight:600;margin-bottom:6px;}
+.upload-zone p{font-size:12.5px;color:var(--text-muted);}
+.form-select,.form-input{height:38px;border:1px solid var(--border);border-radius:8px;padding:0 12px;font-size:13px;font-family:inherit;color:var(--text-primary);background:var(--surface);outline:none;width:100%;}
+.form-select:focus,.form-input:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-ghost);}
+.form-textarea{border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;font-family:inherit;color:var(--text-primary);background:var(--surface);outline:none;width:100%;resize:vertical;}
+.form-textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-ghost);}
+.form-label{font-size:12px;font-weight:600;color:var(--text-secondary);margin-bottom:6px;display:block;}
+.form-group{margin-bottom:14px;}
+.form-row{display:grid;gap:12px;}
+.form-row.col2{grid-template-columns:1fr 1fr;}
+.form-row.col3{grid-template-columns:1fr 1fr 1fr;}
+.form-hint{font-size:11px;color:var(--text-muted);margin-top:4px;}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--surface-2);border-radius:8px;cursor:pointer;margin-bottom:8px;}
+.toggle-row-label{font-size:13px;font-weight:600;}
+.toggle-row-sub{font-size:11.5px;color:var(--text-muted);margin-top:2px;}
+.toggle{width:38px;height:22px;background:var(--border);border-radius:11px;position:relative;transition:background .2s;flex-shrink:0;}
+.toggle.on{background:var(--teal);}
+.toggle::after{content:'';width:16px;height:16px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:left .2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{left:19px;}
+
+/* VALIDATION */
+.validation-msg{padding:10px 14px;border-radius:8px;font-size:12.5px;margin-top:10px;}
+.validation-msg.error{background:rgba(239,68,68,.07);color:var(--danger);border:1px solid rgba(239,68,68,.2);}
+.validation-msg.success{background:rgba(16,185,129,.07);color:#059669;border:1px solid rgba(16,185,129,.2);}
+.validation-msg.warn{background:rgba(245,158,11,.07);color:#d97706;border:1px solid rgba(245,158,11,.2);}
+.validation-msg.info-msg{background:rgba(59,130,246,.06);color:#2563eb;border:1px solid rgba(59,130,246,.2);}
+
+/* XML DIFF */
+.xml-diff-table th{padding:8px 12px;background:var(--surface-2);font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;border-bottom:1px solid var(--border);}
+.xml-diff-table td{padding:9px 12px;border-bottom:1px solid var(--border);}
+.price-up{color:var(--danger);font-weight:600;}
+.price-down{color:var(--success);font-weight:600;}
+.price-same{color:var(--text-muted);}
+
+/* STEPS */
+.steps{display:flex;margin-bottom:20px;border-radius:8px;overflow:hidden;}
+.step{flex:1;display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface-2);font-size:12px;font-weight:600;color:var(--text-muted);}
+.step.active{background:var(--teal-ghost);color:var(--teal);}
+.step.done{background:rgba(16,185,129,.08);color:#059669;}
+.step-num{width:20px;height:20px;border-radius:50%;background:var(--border);color:var(--text-muted);display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;}
+.step.active .step-num{background:var(--teal);color:#fff;}
+.step.done .step-num{background:var(--success);color:#fff;}
+
+/* POPUP */
+.progress-popup{position:fixed;top:70px;right:20px;z-index:300;width:320px;background:var(--surface);border-radius:16px;box-shadow:var(--shadow-md);border:1px solid var(--border);padding:20px;display:none;}
+.progress-popup.open{display:block;animation:slideDown .2s ease;}
+@keyframes slideDown{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.popup-title{font-size:13px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:14px;}
+.popup-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);}
+.popup-row:last-child{border-bottom:none;}
+.popup-row-label{font-size:13px;color:var(--text-secondary);}
+.popup-row-value{font-size:14px;font-weight:700;font-family:'DM Mono',monospace;}
+.popup-row-value.teal{color:var(--teal);}
+.popup-row-value.danger{color:var(--danger);}
+.meta-label{display:flex;justify-content:space-between;font-size:12px;color:var(--text-muted);margin-bottom:6px;margin-top:14px;}
+.meta-progress{height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;}
+.meta-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-light));border-radius:4px;width:72%;}
+
+/* RULE CARD */
+.rule-card{background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px;display:flex;align-items:flex-start;gap:12px;}
+.rule-card-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.rule-card-body{flex:1;}
+.rule-card-title{font-size:13px;font-weight:600;margin-bottom:2px;}
+.rule-card-desc{font-size:12px;color:var(--text-muted);}
+.section-divider{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;padding:12px 0 8px;border-bottom:1px solid var(--border);margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+
+/* ESTOQUE */
+.estoque-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;}
+
+/* CHART */
+.chart-container{position:relative;height:220px;}
+.inline-edit{border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-size:13px;font-family:inherit;width:70px;outline:none;}
+.inline-edit:focus{border-color:var(--teal);}
+#csvFileInput,#xmlFileInput{display:none;}
+
+/* LOCATION BADGE */
+.location-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(59,130,246,.07);color:#2563eb;border-radius:5px;padding:2px 7px;font-size:10.5px;font-weight:600;}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px;}
+
+/* PRINT — isolate only packing list, hide entire app */
+@media print{
+  body > *{display:none!important;}
+  #printArea{display:block!important;}
+}
+#printArea{display:none;}
+
+/* INTEGRATION CARDS */
+.integ-card{background:var(--surface);border:2px solid var(--border);border-radius:var(--radius);padding:18px;cursor:pointer;transition:all .2s;display:flex;flex-direction:column;gap:8px;}
+.integ-card:hover{border-color:var(--teal);box-shadow:0 0 0 3px var(--teal-ghost);}
+.integ-card.active{border-color:var(--teal);background:var(--teal-ghost);}
+.integ-card-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;}
+.integ-card-title{font-size:14px;font-weight:700;color:var(--text-primary);}
+.integ-card-sub{font-size:12px;color:var(--text-secondary);line-height:1.5;}
+.integ-card-status{font-size:11px;font-weight:700;color:var(--text-muted);display:flex;align-items:center;gap:5px;margin-top:4px;}
+.integ-card-status.active{color:var(--success);}
+
+/* BLING CONFIG FORM */
+.bling-config-form{display:none;flex-direction:column;gap:12px;}
+.bling-config-form.show{display:flex;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div><div class="brand-name">AutoFlow <span>PRO</span></div></div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section-label">Principal</div>
+    <button class="nav-item active" onclick="navigate('dashboard',this)"><i class="fas fa-chart-pie"></i> Dashboard</button>
+    <button class="nav-item" onclick="navigate('vendas',this)"><i class="fas fa-cash-register"></i> Mesa de Vendas</button>
+    <button class="nav-item" onclick="navigate('fila',this)"><i class="fas fa-stream"></i> Gestão à Vista <span class="nav-badge">3</span></button>
+    <button class="nav-item" onclick="navigate('comissoes',this)"><i class="fas fa-coins"></i> Comissões</button>
+    <button class="nav-item" onclick="navigate('carrinhos',this)"><i class="fas fa-shopping-cart"></i> Carrinhos Salvos <span class="nav-badge" id="cartBadge" style="display:none">0</span></button>
+    <button class="nav-item" onclick="navigate('vendasHoje',this)"><i class="fas fa-receipt"></i> Vendas Hoje <span class="nav-badge" id="vendasHojeBadge">0</span></button>
+    <div class="nav-section-label">Administração</div>
+    <button class="nav-item" onclick="navigate('estoque',this)"><i class="fas fa-boxes"></i> Estoque & Importação</button>
+    <button class="nav-item" onclick="navigate('integracoes',this)"><i class="fas fa-plug"></i> Integrações <span class="nav-badge" style="background:var(--info);font-size:9px">NOVO</span></button>
+    <button class="nav-item" onclick="navigate('auditoria',this)"><i class="fas fa-shield-alt"></i> Auditoria</button>
+    <button class="nav-item" onclick="navigate('config',this)"><i class="fas fa-sliders-h"></i> Configurações</button>
+    <!-- GESTOR ONLY -->
+    <div class="nav-section-label" style="color:rgba(251,191,36,.4)">Gestor</div>
+    <button class="nav-item manager-only" onclick="navigate('vendedores',this)"><i class="fas fa-users"></i> Vendedores</button>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="user-card">
+      <div class="user-avatar">JS</div>
+      <div><div class="user-name">José Silva</div><div class="user-role">Gestor / Dono</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <header class="topbar">
+    <div class="topbar-left"><span class="page-title" id="pageTitle">Dashboard Geral</span></div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost btn-sm" onclick="togglePopup()"><i class="fas fa-chart-bar"></i> Progresso de Hoje</button>
+      <button class="btn btn-ghost btn-sm" onclick="openModal('insightsModal')"><i class="fas fa-robot"></i> Insights IA</button>
+      <div class="topbar-divider"></div>
+      <button class="btn btn-primary btn-sm" onclick="openModal('xmlModal')"><i class="fas fa-file-import"></i> Importar</button>
+    </div>
+  </header>
+
+  <!-- PROGRESS POPUP -->
+  <div class="progress-popup" id="progressPopup">
+    <div class="popup-title"><i class="fas fa-bolt"></i> Progresso de Hoje</div>
+    <div class="popup-row"><span class="popup-row-label">Faturamento Agora</span><span class="popup-row-value teal">R$ 18.440</span></div>
+    <div class="popup-row"><span class="popup-row-label">Nº de Vendas</span><span class="popup-row-value">23</span></div>
+    <div class="popup-row"><span class="popup-row-label">Vendas Perdidas</span><span class="popup-row-value danger">R$ 1.250</span></div>
+    <div class="meta-label"><span>Meta do Mês</span><span>72%</span></div>
+    <div class="meta-progress"><div class="meta-fill"></div></div>
+  </div>
+
+  <div class="content">
+
+    <!-- DASHBOARD -->
+    <section id="dashboard" class="view active">
+      <div class="kpi-grid">
+        <div class="kpi-card"><div class="kpi-label">Faturamento Mês</div><div class="kpi-value">R$ 142.500</div><div class="kpi-sub"><span class="up">↑ 12%</span> vs mês anterior</div><div class="kpi-icon"><i class="fas fa-chart-line"></i></div></div>
+        <div class="kpi-card info"><div class="kpi-label">Lucro Estimado</div><div class="kpi-value">R$ 38.400</div><div class="kpi-sub">Margem: <strong>26,9%</strong></div><div class="kpi-icon"><i class="fas fa-percentage"></i></div></div>
+        <div class="kpi-card warning"><div class="kpi-label">Meta do Mês</div><div class="kpi-value">72%</div><div class="kpi-sub">Faltam R$ 55.500 para R$ 200k</div><div class="kpi-icon"><i class="fas fa-bullseye"></i></div></div>
+        <div class="kpi-card danger"><div class="kpi-label">Faturamento Perdido</div><div class="kpi-value danger">R$ 4.250</div><div class="kpi-sub"><span class="down">↑ 3 rupturas ativas</span></div><div class="kpi-icon"><i class="fas fa-exclamation-triangle"></i></div></div>
+      </div>
+      <div class="guardiao-banner">
+        <div class="guardiao-icon">🛡️</div>
+        <div><div class="guardiao-title">Insight do Guardião</div><div class="guardiao-text">Ontem, <strong>18 clientes</strong> buscaram <strong>Pastilha Cobreq</strong> e não havia estoque. Prejuízo estimado: <strong>R$ 2.100,00</strong>. Considere repor o item com urgência.</div></div>
+      </div>
+      <div class="grid-3-1">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Vendas Realizadas vs. Perdidas</span><span class="badge badge-neutral">Últimos 7 dias</span></div>
+          <div class="card-body"><div class="chart-container"><canvas id="chartVendas"></canvas></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Top Vendedores</span></div>
+          <div class="card-body">
+            <div class="seller-item"><div class="seller-rank gold">1</div><div class="seller-info"><div class="seller-name">Marcos Silva</div><div class="seller-bar-wrap"><div class="seller-bar" style="width:85%"></div></div></div><div class="seller-value">R$ 45k</div></div>
+            <div class="seller-item"><div class="seller-rank silver">2</div><div class="seller-info"><div class="seller-name">Ana Paula</div><div class="seller-bar-wrap"><div class="seller-bar" style="width:72%;background:var(--info)"></div></div></div><div class="seller-value">R$ 38k</div></div>
+            <div class="seller-item"><div class="seller-rank bronze">3</div><div class="seller-info"><div class="seller-name">Carlos Mendes</div><div class="seller-bar-wrap"><div class="seller-bar" style="width:55%;background:var(--warning)"></div></div></div><div class="seller-value">R$ 29k</div></div>
+          </div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Comissões a Pagar</span><span class="badge badge-warning">2 pendentes</span></div>
+          <div class="card-body">
+            <table><thead><tr><th>Vendedor</th><th>Vendas</th><th>%</th><th>Comissão</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Marcos Silva</strong></td><td>R$ 45.000</td><td>5%</td><td><strong>R$ 2.250</strong></td><td><span class="badge badge-success">Pago</span></td></tr>
+              <tr><td><strong>Ana Paula</strong></td><td>R$ 38.000</td><td>5%</td><td><strong>R$ 1.900</strong></td><td><span class="badge badge-warning">Pendente</span></td></tr>
+              <tr><td><strong>Carlos Mendes</strong></td><td>R$ 29.000</td><td>4%</td><td><strong>R$ 1.160</strong></td><td><span class="badge badge-warning">Pendente</span></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Orçamentos em Aberto</span><span class="badge badge-info">+24h</span></div>
+          <div class="card-body">
+            <table><thead><tr><th>Cliente</th><th>Valor</th><th>Aguardando</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><strong>Auto Peças Rápido</strong></td><td>R$ 1.240</td><td><span style="color:var(--danger);font-weight:600">36h</span></td><td><button class="btn btn-ghost btn-sm"><i class="fab fa-whatsapp"></i></button></td></tr>
+              <tr><td><strong>Oficina do Zé</strong></td><td>R$ 780</td><td><span style="color:var(--warning);font-weight:600">28h</span></td><td><button class="btn btn-ghost btn-sm"><i class="fab fa-whatsapp"></i></button></td></tr>
+            </tbody></table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MESA DE VENDAS -->
+    <section id="vendas" class="view">
+      <!-- META DO MÊS BAR (sem comissões individuais) -->
+      <div class="meta-bar-pdv">
+        <div>
+          <div class="meta-bar-pdv-label">Meta do Mês</div>
+          <div class="meta-bar-pdv-value">72%</div>
+        </div>
+        <div class="meta-bar-pdv-progress">
+          <div class="meta-bar-pdv-top"><span>R$ 142.500 faturado</span><span>Meta: R$ 200.000</span></div>
+          <div class="meta-bar-pdv-wrap"><div class="meta-bar-pdv-fill" id="metaBarFill"></div></div>
+          <div style="font-size:11px;color:rgba(255,255,255,.35);margin-top:5px">Faltam <strong style="color:rgba(255,255,255,.65)">R$ 57.500</strong> para bater a meta do mês</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;color:rgba(255,255,255,.35)">Carrinhos Salvos</div>
+          <div style="font-size:22px;font-weight:700;color:#fbbf24" id="savedCartCount">2</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.4)">orçamentos pendentes</div>
+        </div>
+      </div>
+
+      <div class="pdv-grid">
+        <!-- PRODUTOS -->
+        <div class="card">
+          <div class="card-body">
+            <div style="display:flex;gap:10px;margin-bottom:14px">
+              <div class="search-wrap" style="flex:1">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" class="search-input" placeholder="Buscar produto por nome ou referência..." oninput="filterProducts(this.value)">
+              </div>
+            </div>
+            <div class="table-wrap"><table><thead><tr><th>Produto</th><th>Local.</th><th>Estoque</th><th>Preço</th><th>Ação</th></tr></thead><tbody id="productTbody"></tbody></table></div>
+          </div>
+        </div>
+        <!-- CARRINHO -->
+        <div>
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Carrinho / Orçamento</span>
+              <button class="btn btn-ghost btn-sm" onclick="clearCart()"><i class="fas fa-trash"></i></button>
+            </div>
+            <div class="card-body" style="padding-top:14px">
+              <!-- SELETOR DE VENDEDOR -->
+              <div class="seller-selector">
+                <div class="seller-selector-label"><i class="fas fa-user" style="margin-right:4px"></i> Selecionar Vendedor</div>
+                <div class="seller-chips" id="sellerChips"></div>
+              </div>
+              <div id="cartBody"><div class="cart-empty"><i class="fas fa-shopping-cart" style="font-size:28px;margin-bottom:10px;opacity:.2"></i><span style="font-size:13px">Carrinho vazio</span></div></div>
+              <div id="cartFooter" style="display:none">
+                <div class="cart-total"><span class="cart-total-label">Total:</span><span class="cart-total-value" id="cartTotal">R$ 0,00</span></div>
+                <div style="margin-top:12px;display:flex;flex-direction:column;gap:7px">
+                  <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="finalizarVenda()"><i class="fas fa-check-circle"></i> Finalizar Venda</button>
+                  <button class="btn btn-success" style="width:100%;justify-content:center" onclick="guardarOrcamento()"><i class="fas fa-bookmark"></i> Guardar Orçamento</button>
+                  <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="whatsappOrcamento()"><i class="fab fa-whatsapp" style="color:#25d366"></i> Orçamento WhatsApp</button>
+                  <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="imprimirPackingList()"><i class="fas fa-print"></i> Imprimir Packing List</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GESTÃO À VISTA -->
+    <section id="fila" class="view">
+      <div class="kpi-grid" style="grid-template-columns:repeat(3,1fr);margin-bottom:20px">
+        <div class="kpi-card"><div class="kpi-label">Na Fila</div><div class="kpi-value">3</div><div class="kpi-icon"><i class="fas fa-clock"></i></div></div>
+        <div class="kpi-card warning"><div class="kpi-label">Em Alerta</div><div class="kpi-value" style="color:var(--warning)">1</div><div class="kpi-icon"><i class="fas fa-exclamation"></i></div></div>
+        <div class="kpi-card danger"><div class="kpi-label">Urgente</div><div class="kpi-value danger">1</div><div class="kpi-icon"><i class="fas fa-fire"></i></div></div>
+      </div>
+      <div class="order-grid-wrap" id="orderQueue"></div>
+    </section>
+
+    <!-- COMISSÕES -->
+    <section id="comissoes" class="view">
+      <div class="commission-hero">
+        <div class="commission-label">Total Pago em Comissões — Maio 2025</div>
+        <div class="commission-amount">R$ 12.450,00</div>
+        <div class="commission-month">3 vendedores ativos</div>
+      </div>
+      <div class="commission-cards">
+        <div class="commission-mini"><div class="commission-mini-label">Total Faturado</div><div class="commission-mini-value">R$ 142.500</div></div>
+        <div class="commission-mini"><div class="commission-mini-label">Comissão Média</div><div class="commission-mini-value">5,0%</div></div>
+        <div class="commission-mini"><div class="commission-mini-label">Pendente Pagamento</div><div class="commission-mini-value" style="color:var(--warning)">R$ 5.250</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Extrato Detalhado por Vendedor</span>
+          <button class="btn btn-primary btn-sm" onclick="openModal('commissionConfigModal')"><i class="fas fa-cog"></i> Configurar Regras <span class="manager-badge" style="margin-left:4px">GESTOR</span></button>
+        </div>
+        <div class="card-body">
+          <table><thead><tr><th>Vendedor</th><th>Vendas Totais</th><th>Regra</th><th>% Comissão</th><th>Valor</th><th>Meta Mês</th><th>% Meta</th><th>Status</th><th></th></tr></thead>
+          <tbody id="commissionExtract"></tbody></table>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARRINHOS SALVOS -->
+    <section id="carrinhos" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Carrinhos Salvos</h2>
+          <p style="font-size:13px;color:var(--text-secondary)">Orçamentos guardados aguardando confirmação dos clientes</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="form-select" style="width:160px;height:36px;font-size:12px" id="filterQuoteSeller" onchange="renderSavedQuotes()">
+            <option value="">Todos os vendedores</option>
+          </select>
+        </div>
+      </div>
+      <div id="savedQuotesList"></div>
+    </section>
+
+    <!-- ESTOQUE -->
+    <section id="estoque" class="view">
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header">
+          <span class="card-title">Estoque Mestre</span>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="openModal('bulkAddModal')"><i class="fas fa-layer-group"></i> Adicionar em Massa</button>
+            <button class="btn btn-primary btn-sm" onclick="openModal('addProductModal')"><i class="fas fa-plus"></i> Novo Produto</button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Produto</th><th>Localização</th><th>Mín.</th><th>Atual</th><th>Custo</th><th>Venda</th><th>Status</th><th>Ações</th></tr></thead>
+              <tbody id="stockTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div class="estoque-grid">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Importar Estoque</span></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+              <button class="btn btn-ghost" style="justify-content:center;padding:14px;flex-direction:column;gap:6px" onclick="openModal('csvModal')">
+                <i class="fas fa-file-csv" style="font-size:24px;color:var(--success)"></i>
+                <div style="font-size:12px;font-weight:700">CSV / Planilha</div>
+                <div style="font-size:11px;color:var(--text-muted)">Mapeamento de colunas</div>
+              </button>
+              <button class="btn btn-ghost" style="justify-content:center;padding:14px;flex-direction:column;gap:6px" onclick="openModal('xmlModal')">
+                <i class="fas fa-file-code" style="font-size:24px;color:var(--info)"></i>
+                <div style="font-size:12px;font-weight:700">XML NF-e</div>
+                <div style="font-size:11px;color:var(--text-muted)">Nota fiscal fornecedor</div>
+              </button>
+            </div>
+            <div style="background:var(--surface-2);border-radius:10px;padding:14px">
+              <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Últimas Importações</div>
+              <div style="display:flex;flex-direction:column;gap:8px;font-size:13px">
+                <div style="display:flex;justify-content:space-between"><span>NF-e Distribuidora Sul</span><span class="badge badge-success">+48 itens</span></div>
+                <div style="display:flex;justify-content:space-between"><span>CSV Estoque Manual</span><span class="badge badge-info">112 itens</span></div>
+                <div style="display:flex;justify-content:space-between"><span>NF-e Monroe Amort.</span><span class="badge badge-success">+22 itens</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Resumo de Alertas</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(239,68,68,.05);border-radius:8px;border:1px solid rgba(239,68,68,.15)"><div><div style="font-size:13px;font-weight:600;color:var(--danger)">Zerados</div><div style="font-size:12px;color:var(--text-muted)">2 itens sem estoque</div></div><span class="badge badge-danger">REPOR JÁ</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(245,158,11,.05);border-radius:8px;border:1px solid rgba(245,158,11,.15)"><div><div style="font-size:13px;font-weight:600;color:#d97706">Abaixo do Mínimo</div><div style="font-size:12px;color:var(--text-muted)">1 item em nível crítico</div></div><span class="badge badge-warning">ATENÇÃO</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:rgba(59,130,246,.05);border-radius:8px;border:1px solid rgba(59,130,246,.15)"><div><div style="font-size:13px;font-weight:600;color:var(--info)">Parados +90 dias</div><div style="font-size:12px;color:var(--text-muted)">1 item sem movimentação</div></div><span class="badge badge-info">VERIFICAR</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AUDITORIA -->
+    <section id="auditoria" class="view">
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px">
+        <div class="kpi-card danger"><div class="kpi-label">Anomalias</div><div class="kpi-value danger">2</div><div class="kpi-icon"><i class="fas fa-bug"></i></div></div>
+        <div class="kpi-card warning"><div class="kpi-label">Ajustes Manuais</div><div class="kpi-value" style="color:var(--warning)">5</div><div class="kpi-icon"><i class="fas fa-edit"></i></div></div>
+        <div class="kpi-card"><div class="kpi-label">Rupturas</div><div class="kpi-value">3</div><div class="kpi-icon"><i class="fas fa-box-open"></i></div></div>
+        <div class="kpi-card info"><div class="kpi-label">Eventos Hoje</div><div class="kpi-value" style="color:var(--info)">8</div><div class="kpi-icon"><i class="fas fa-list"></i></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-title"><i class="fas fa-shield-alt" style="color:var(--teal);margin-right:8px"></i>Log do Guardião</span><button class="btn btn-ghost btn-sm"><i class="fas fa-download"></i> Exportar</button></div>
+        <div class="card-body">
+          <div class="log-item"><div class="log-dot-wrap"><div class="log-dot anomaly"></div><div class="log-line"></div></div><div class="log-content"><div class="log-meta"><span class="log-event">⚠️ Anomalia Detectada</span><span class="log-time">Hoje 10:15</span></div><div class="log-desc">Baixa rápida de <strong>5 unidades</strong> de 'Óleo Selenia' sem registro de venda. Valor: <strong>R$ 140,00</strong></div></div></div>
+          <div class="log-item"><div class="log-dot-wrap"><div class="log-dot warning"></div><div class="log-line"></div></div><div class="log-content"><div class="log-meta"><span class="log-event">🖊️ Item Zerado Manualmente</span><span class="log-time">Hoje 14:20</span></div><div class="log-desc">Vendedor <strong>Marcos</strong> zerou 'Pastilha Celta'. Motivo: falta física. Impacto: R$ 850,00</div></div></div>
+          <div class="log-item"><div class="log-dot-wrap"><div class="log-dot info"></div><div class="log-line"></div></div><div class="log-content"><div class="log-meta"><span class="log-event">📦 Importação XML</span><span class="log-time">Ontem 09:00</span></div><div class="log-desc">NF-e Distribuidora Sul: 48 itens, 3 com custo alterado.</div></div></div>
+          <div class="log-item"><div class="log-dot-wrap"><div class="log-dot anomaly"></div></div><div class="log-content"><div class="log-meta"><span class="log-event">⚠️ Ruptura de Estoque</span><span class="log-time">Ontem 15:40</span></div><div class="log-desc"><strong>18 buscas</strong> por 'Pastilha Cobreq' sem estoque. Faturamento perdido: R$ 2.100,00</div></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONFIGURAÇÕES -->
+    <section id="config" class="view">
+      <div class="grid-2">
+        <div class="card">
+          <div class="card-header"><span class="card-title">Configurações Gerais</span></div>
+          <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+            <div class="form-group"><label class="form-label">Nome da Empresa</label><input class="form-input" value="Distribuidora Auto Silva"></div>
+            <div class="form-row col2">
+              <div class="form-group"><label class="form-label">Meta Mensal (R$)</label><input class="form-input" type="number" value="200000"></div>
+              <div class="form-group"><label class="form-label">Meta Diária Padrão (R$)</label><input class="form-input" type="number" value="8000"></div>
+            </div>
+            <div class="form-group"><label class="form-label">E-mail do Gestor</label><input class="form-input" type="email" value="jose@autosilva.com.br"></div>
+            <div class="form-group"><label class="form-label">WhatsApp para Alertas</label><input class="form-input" value="+55 41 99999-0000"></div>
+            <button class="btn btn-primary" style="align-self:flex-start">Salvar Configurações</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-title">Alertas Ativos <span class="manager-badge">GESTOR</span></span></div>
+          <div class="card-body">
+            <div class="toggle-row" onclick="toggleSwitch(this)"><div class="toggle-row-info"><div class="toggle-row-label">Ruptura de Estoque</div><div class="toggle-row-sub">Item zerado abaixo do mínimo</div></div><div class="toggle on"></div></div>
+            <div class="toggle-row" onclick="toggleSwitch(this)"><div class="toggle-row-info"><div class="toggle-row-label">Anomalia de Estoque</div><div class="toggle-row-sub">Baixas sem venda registrada</div></div><div class="toggle on"></div></div>
+            <div class="toggle-row" onclick="toggleSwitch(this)"><div class="toggle-row-info"><div class="toggle-row-label">Item Zerado Manualmente</div><div class="toggle-row-sub">Quando vendedor zerar item manualmente</div></div><div class="toggle on"></div></div>
+            <div class="toggle-row" onclick="toggleSwitch(this)"><div class="toggle-row-info"><div class="toggle-row-label">Relatório IA — 07h</div><div class="toggle-row-sub">Insights diários no WhatsApp/e-mail</div></div><div class="toggle on"></div></div>
+            <div class="toggle-row" onclick="toggleSwitch(this)"><div class="toggle-row-info"><div class="toggle-row-label">Orçamentos +24h sem resposta</div><div class="toggle-row-sub">Follow-up automático de orçamentos abertos</div></div><div class="toggle on"></div></div>
+            <div class="toggle-row" onclick="toggleSwitch(this)">
+              <div class="toggle-row-info">
+                <div class="toggle-row-label">Estoque Parado</div>
+                <div class="toggle-row-sub">Item sem movimentação por
+                  <select class="form-select" style="width:80px;height:26px;padding:0 6px;font-size:11px;display:inline-block;margin:0 4px" onclick="event.stopPropagation()">
+                    <option>30 dias</option><option>60 dias</option><option selected>90 dias</option><option>120 dias</option><option>180 dias</option>
+                  </select>
+                </div>
+              </div>
+              <div class="toggle on"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- ═══ INTEGRAÇÕES ═══ -->
+    <section id="integracoes" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Integrações & Conexões</h2>
+          <p style="font-size:13px;color:var(--text-secondary)">Conecte o AutoFlow PRO ao seu ERP, planilha ou opere de forma autônoma</p>
+        </div>
+        <span class="badge badge-info" style="font-size:12px;padding:6px 14px">Versão Demo — Configuração Disponível no Plano PRO</span>
+      </div>
+
+      <!-- MODO DE OPERAÇÃO -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-sliders-h" style="color:var(--teal);margin-right:8px"></i>Modo de Operação</span>
+          <span class="badge badge-neutral">Escolha como o sistema recebe os dados</span>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px">
+
+            <!-- MODO: SEM ERP / AUTÔNOMO -->
+            <div class="integ-card active" onclick="selectModoOperacao(this,'autonomo')" id="modo_autonomo">
+              <div class="integ-card-icon" style="background:rgba(16,185,129,.1);color:var(--success)"><i class="fas fa-leaf"></i></div>
+              <div class="integ-card-title">Autônomo (Planilha)</div>
+              <div class="integ-card-sub">Sem ERP. Dados gerenciados direto no AutoFlow via CSV, XML e importação manual.</div>
+              <div class="integ-card-status active"><i class="fas fa-check-circle"></i> Modo Atual</div>
+            </div>
+
+            <!-- MODO: BLING -->
+            <div class="integ-card" onclick="selectModoOperacao(this,'bling')" id="modo_bling">
+              <div class="integ-card-icon" style="background:rgba(59,130,246,.1);color:var(--info)"><i class="fas fa-link"></i></div>
+              <div class="integ-card-title">Integrado — Bling</div>
+              <div class="integ-card-sub">AutoFlow lê produtos e vendas do Bling. Comissões, TV e alertas calculados automaticamente.</div>
+              <div class="integ-card-status"><i class="fas fa-circle" style="font-size:8px"></i> Inativo</div>
+            </div>
+
+            <!-- MODO: TINY/OLIST -->
+            <div class="integ-card" onclick="selectModoOperacao(this,'tiny')" id="modo_tiny">
+              <div class="integ-card-icon" style="background:rgba(139,92,246,.1);color:#7C3AED"><i class="fas fa-link"></i></div>
+              <div class="integ-card-title">Integrado — Tiny (Olist)</div>
+              <div class="integ-card-sub">AutoFlow lê produtos e pedidos do Tiny/Olist. Mesma lógica do Bling, padrão de colunas diferente.</div>
+              <div class="integ-card-status"><i class="fas fa-circle" style="font-size:8px"></i> Inativo</div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:20px">
+
+        <!-- CONFIGURAÇÃO DA CONEXÃO -->
+        <div class="card" id="configConexaoCard">
+          <div class="card-header">
+            <span class="card-title" id="configConexaoTitle"><i class="fas fa-leaf" style="color:var(--success);margin-right:8px"></i>Modo Autônomo Ativo</span>
+          </div>
+          <div class="card-body" id="configConexaoBody">
+            <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:16px;margin-bottom:16px">
+              <div style="font-size:13px;font-weight:700;color:var(--success);margin-bottom:6px">✅ Nenhuma configuração necessária</div>
+              <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">O sistema opera de forma totalmente autônoma. Dados gerenciados via importação de CSV, XML de NF-e fornecedor e cadastro manual na tela de Estoque.</div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface-2);border-radius:8px;font-size:13px">
+                <i class="fas fa-check-circle" style="color:var(--success)"></i>
+                <span>Importação de CSV / Planilha Excel</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface-2);border-radius:8px;font-size:13px">
+                <i class="fas fa-check-circle" style="color:var(--success)"></i>
+                <span>Importação de XML NF-e do fornecedor</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface-2);border-radius:8px;font-size:13px">
+                <i class="fas fa-check-circle" style="color:var(--success)"></i>
+                <span>Adição manual de produtos e ajuste de estoque</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface-2);border-radius:8px;font-size:13px">
+                <i class="fas fa-check-circle" style="color:var(--success)"></i>
+                <span>Espelho de NF para contador (PDF com um clique)</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- STATUS DA SINCRONIZAÇÃO -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title"><i class="fas fa-sync-alt" style="color:var(--teal);margin-right:8px"></i>Status da Sincronização</span>
+            <span class="badge badge-success" id="syncStatusBadge">Operando</span>
+          </div>
+          <div class="card-body" id="syncStatusBody">
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--surface-2);border-radius:8px">
+                <div>
+                  <div style="font-size:13px;font-weight:600">Produtos no Catálogo</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Última atualização: agora</div>
+                </div>
+                <span style="font-size:22px;font-weight:700;color:var(--teal);font-family:'DM Mono',monospace" id="syncProdCount">6</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:var(--surface-2);border-radius:8px">
+                <div>
+                  <div style="font-size:13px;font-weight:600">Vendas Registradas Hoje</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Zerado automaticamente à meia-noite</div>
+                </div>
+                <span style="font-size:22px;font-weight:700;color:var(--teal);font-family:'DM Mono',monospace" id="syncSaleCount">8</span>
+              </div>
+              <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(16,185,129,.05);border-radius:8px;border:1px solid rgba(16,185,129,.15)">
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--success)">Sistema Operando</div>
+                  <div style="font-size:12px;color:var(--text-muted)">Sem erros detectados</div>
+                </div>
+                <i class="fas fa-check-circle" style="font-size:24px;color:var(--success)"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ESPELHO DE NF PARA CONTADOR -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-file-invoice" style="color:var(--warning);margin-right:8px"></i>Espelho de NF — Para o Contador</span>
+          <span class="badge badge-warning">Disponível em todos os modos</span>
+        </div>
+        <div class="card-body">
+          <div style="background:rgba(245,158,11,.06);border:1px solid rgba(245,158,11,.2);border-radius:10px;padding:16px;margin-bottom:16px">
+            <div style="font-size:13px;font-weight:700;color:#B45309;margin-bottom:6px">📄 O que é o Espelho de NF?</div>
+            <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">
+              Gera um PDF profissional com todas as vendas do dia no formato que seu contador precisa — sem precisar emitir Nota Fiscal. 
+              Ideal para quem usa emissor gratuito da SEFAZ ou envia os dados para o escritório contábil.
+              <strong>Economiza horas de digitação manual toda semana.</strong>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px">
+            <div style="background:var(--surface-2);border-radius:8px;padding:12px;text-align:center">
+              <i class="fas fa-calendar-day" style="font-size:20px;color:var(--teal);margin-bottom:8px"></i>
+              <div style="font-size:12px;font-weight:700">Fechamento Diário</div>
+              <div style="font-size:11px;color:var(--text-muted)">Todas as vendas do dia</div>
+            </div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:12px;text-align:center">
+              <i class="fas fa-calendar-week" style="font-size:20px;color:var(--info);margin-bottom:8px"></i>
+              <div style="font-size:12px;font-weight:700">Fechamento Semanal</div>
+              <div style="font-size:11px;color:var(--text-muted)">Resumo da semana</div>
+            </div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:12px;text-align:center">
+              <i class="fas fa-calendar-alt" style="font-size:20px;color:var(--warning);margin-bottom:8px"></i>
+              <div style="font-size:12px;font-weight:700">Fechamento Mensal</div>
+              <div style="font-size:11px;color:var(--text-muted)">Para declaração fiscal</div>
+            </div>
+            <div style="background:var(--surface-2);border-radius:8px;padding:12px;text-align:center">
+              <i class="fab fa-whatsapp" style="font-size:20px;color:var(--success);margin-bottom:8px"></i>
+              <div style="font-size:12px;font-weight:700">Enviar por WhatsApp</div>
+              <div style="font-size:11px;color:var(--text-muted)">Direto para o contador</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:10px">
+            <button class="btn btn-primary" onclick="gerarEspelhoNF('diario')"><i class="fas fa-file-pdf"></i> Gerar Espelho do Dia</button>
+            <button class="btn btn-ghost" onclick="gerarEspelhoNF('mensal')"><i class="fas fa-file-pdf"></i> Espelho Mensal</button>
+            <button class="btn btn-ghost" style="color:var(--success);border-color:rgba(16,185,129,.3)" onclick="enviarContadorWhatsApp()"><i class="fab fa-whatsapp"></i> Enviar para Contador</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- O QUE MUDA COM ERP (BLING/TINY) -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-info-circle" style="color:var(--info);margin-right:8px"></i>O que muda ao conectar com Bling ou Tiny?</span>
+        </div>
+        <div class="card-body">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Modo Autônomo (Atual)</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0"></i><span>Você gerencia produtos, preços e estoque direto aqui</span></div>
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0"></i><span>Importação via CSV e XML da NF-e do fornecedor</span></div>
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0"></i><span>Espelho de NF gerado aqui mesmo para o contador</span></div>
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0"></i><span>Zero dependência de sistema externo</span></div>
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-times-circle" style="color:var(--danger);margin-top:2px;flex-shrink:0"></i><span>Nota Fiscal emitida separadamente (SEFAZ ou contador)</span></div>
+              </div>
+            </div>
+            <div>
+              <div style="font-size:12px;font-weight:700;color:var(--info);text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px">Com Bling / Tiny Conectado</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0"></i><span>Catálogo de produtos sincronizado automaticamente</span></div>
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0"></i><span>Estoque baixa no Bling ao finalizar venda aqui</span></div>
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0"></i><span>Vendedor nunca precisa abrir o Bling</span></div>
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-check-circle" style="color:var(--success);margin-top:2px;flex-shrink:0"></i><span>Botão "Emitir NF" dispara nota fiscal no Bling direto daqui</span></div>
+                <div style="display:flex;align-items:flex-start;gap:8px;font-size:13px"><i class="fas fa-info-circle" style="color:var(--info);margin-top:2px;flex-shrink:0"></i><span>Requer API Key do Bling com permissão de leitura e escrita</span></div>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:14px;background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:10px;font-size:12.5px;color:var(--text-secondary);line-height:1.6">
+            <strong style="color:var(--info)">💡 Dica:</strong> Se você usa Bling apenas para emitir nota fiscal e não para vender, o <strong>Modo Autônomo + Espelho de NF</strong> já resolve tudo sem nenhuma integração técnica. A integração com Bling faz sentido quando você quer que o AutoFlow seja a <em>única tela</em> que o vendedor usa.
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+
+    <!-- ═══ VENDAS HOJE ═══ -->
+    <section id="vendasHoje" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Vendas Hoje</h2>
+          <p style="font-size:13px;color:var(--text-secondary)" id="vendasHojeSubtitle">Registros do dia — somem automaticamente à meia-noite</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <select class="form-select" style="width:170px;height:36px;font-size:12px" id="filterVendasVendedor" onchange="renderVendasHoje()">
+            <option value="">Todos os vendedores</option>
+          </select>
+          <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:7px 16px;font-size:14px;font-weight:700;color:var(--teal);font-family:'DM Mono',monospace" id="vendasHojeTotal">R$ 0,00</div>
+        </div>
+      </div>
+      <div class="kpi-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:20px" id="vendasHojeKpis"></div>
+      <div class="card">
+        <div class="card-body" style="padding:0">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Código</th><th>Hora</th><th>Vendedor</th><th>Produtos</th><th>Total</th><th>Comissão</th><th>Status</th></tr></thead>
+              <tbody id="vendasHojeTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ VENDEDORES (gestor) ═══ -->
+    <section id="vendedores" class="view">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
+        <div>
+          <h2 style="font-size:18px;font-weight:700;margin-bottom:4px">Vendedores <span class="manager-badge" style="vertical-align:middle">GESTOR</span></h2>
+          <p style="font-size:13px;color:var(--text-secondary)">Gerencie a equipe, corrija vendas e ajuste comissões</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal('addVendorModal')"><i class="fas fa-user-plus"></i> Adicionar Vendedor</button>
+      </div>
+
+      <!-- tabela vendedores -->
+      <div class="card" style="margin-bottom:20px">
+        <div class="card-header"><span class="card-title"><i class="fas fa-users" style="color:var(--teal);margin-right:8px"></i>Equipe Ativa</span></div>
+        <div class="card-body" style="padding:0">
+          <table>
+            <thead><tr><th>Vendedor</th><th>Login</th><th>Comissão</th><th>Meta Mensal</th><th>Vendas Mês</th><th>% Meta</th><th>Perfil</th><th>Ações</th></tr></thead>
+            <tbody id="vendedoresTbody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- pesquisa / correção de vendas -->
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title"><i class="fas fa-tools" style="color:var(--warning);margin-right:8px"></i>Pesquisar &amp; Corrigir Venda</span>
+          <span class="manager-badge">GESTOR</span>
+        </div>
+        <div class="card-body">
+          <div style="display:flex;gap:10px;margin-bottom:4px">
+            <div class="search-wrap" style="flex:1">
+              <i class="fas fa-search search-icon"></i>
+              <input type="text" class="search-input" id="saleSearchInput" placeholder="Código da venda (ex: VND-1042) ou nome do vendedor..." oninput="searchSales(this.value)">
+            </div>
+            <button class="btn btn-ghost btn-sm" onclick="searchSales('__all__')"><i class="fas fa-list"></i> Mostrar Todas</button>
+          </div>
+          <div style="font-size:11.5px;color:var(--text-muted);margin-bottom:14px"><i class="fas fa-info-circle" style="margin-right:4px"></i>Você pode editar preço, produto, vendedor ou extornar uma venda.</div>
+          <div id="saleSearchResults">
+            <div style="text-align:center;padding:36px;color:var(--text-muted)"><i class="fas fa-search" style="font-size:36px;opacity:.15;display:block;margin-bottom:12px"></i><div style="font-size:13px">Digite o código ou nome do vendedor</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<!-- ═══ MODALS ═══ -->
+
+<!-- EDIT SALE (gestor) -->
+<div class="modal-overlay" id="editSaleModal">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-edit" style="color:var(--warning);margin-right:8px"></i>Editar Venda <span id="editSaleIdLabel" style="font-size:13px;font-weight:400;color:var(--text-muted)"></span></span>
+      <button class="modal-close" onclick="closeModal('editSaleModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="es_id">
+      <div class="form-row col2" style="margin-bottom:14px">
+        <div class="form-group">
+          <label class="form-label">Vendedor Responsável</label>
+          <select class="form-select" id="es_seller"></select>
+          <div class="form-hint">Altere o vendedor caso a comissão tenha caído para a pessoa errada</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status da Venda</label>
+          <select class="form-select" id="es_status">
+            <option value="ok">✅ Concluída</option>
+            <option value="estornada">↩️ Estornada</option>
+          </select>
+        </div>
+      </div>
+      <!-- itens editáveis -->
+      <div class="section-divider"><i class="fas fa-box" style="color:var(--teal)"></i>Itens da Venda</div>
+      <div id="es_items_wrap"></div>
+      <!-- totais recalculados -->
+      <div style="background:var(--surface-2);border-radius:10px;padding:14px;display:flex;justify-content:space-between;align-items:center;margin-top:12px">
+        <div style="font-size:13px;font-weight:600;color:var(--text-secondary)">Total Recalculado</div>
+        <div style="font-size:22px;font-weight:700;color:var(--teal);font-family:'DM Mono',monospace" id="es_total_preview">R$ 0,00</div>
+      </div>
+      <div id="es_validation" style="margin-top:10px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" style="color:var(--danger);border-color:rgba(239,68,68,.3)" onclick="confirmEstorno()"><i class="fas fa-undo"></i> Estornar Venda</button>
+      <button class="btn btn-ghost" onclick="closeModal('editSaleModal')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveEditSale()"><i class="fas fa-save"></i> Salvar Alterações</button>
+    </div>
+  </div>
+</div>
+
+<!-- ESTORNO CONFIRM -->
+<div class="modal-overlay" id="estornoModal">
+  <div class="modal modal-sm">
+    <div class="modal-header">
+      <span class="modal-title"><i class="fas fa-undo" style="color:var(--danger);margin-right:8px"></i>Confirmar Estorno</span>
+      <button class="modal-close" onclick="closeModal('estornoModal')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="background:rgba(239,68,68,.06);border:1px solid rgba(239,68,68,.2);border-radius:10px;padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--danger);margin-bottom:6px">⚠️ Atenção — esta ação não pode ser desfeita</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">A venda será marcada como estornada, o estoque dos produtos será reintegrado e a comissão do vendedor será descontada.</div>
+      </div>
+      <div id="estornoDetails" style="background:var(--surface-2);border-radius:10px;padding:14px;font-size:13px"></div>
+      <div class="form-group" style="margin-top:14px">
+        <label class="form-label">Motivo do Estorno *</label>
+        <select class="form-select" id="estornoMotivo">
+          <option value="">Selecione o motivo...</option>
+          <option>Devolução pelo cliente</option>
+          <option>Produto com defeito</option>
+          <option>Pedido cancelado</option>
+          <option>Erro de cobrança</option>
+          <option>Outro motivo</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('estornoModal')">Cancelar</button>
+      <button class="btn btn-danger" onclick="executeEstorno()"><i class="fas fa-undo"></i> Confirmar Estorno</button>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHTS IA -->
+<div class="modal-overlay" id="insightsModal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title">🤖 Insights da IA — Relatório de Ontem</span><button class="modal-close" onclick="closeModal('insightsModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div style="background:var(--teal-ghost);border:1px solid rgba(0,137,123,.2);border-radius:10px;padding:16px;margin-bottom:16px"><div style="font-size:12px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px">Gerado em 22/02/2026 às 07:00</div><p style="font-size:13.5px;line-height:1.7">Ontem foi um dia acima da média. Faturamento de R$ 18.440 com 23 vendas. A operação perdeu R$ 2.100 por ruptura de Pastilha Cobreq.</p></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div style="background:var(--surface-2);border-radius:10px;padding:14px"><div style="font-size:11px;font-weight:700;color:var(--text-muted);margin-bottom:6px">🏆 MELHOR VENDEDOR</div><div style="font-size:16px;font-weight:700">Marcos Silva</div><div style="font-size:13px;color:var(--text-secondary)">R$ 6.400 em 8 vendas</div></div>
+        <div style="background:rgba(239,68,68,.05);border-radius:10px;padding:14px"><div style="font-size:11px;font-weight:700;color:var(--danger);margin-bottom:6px">💸 FATURAMENTO PERDIDO</div><div style="font-size:16px;font-weight:700;color:var(--danger)">R$ 2.100,00</div><div style="font-size:13px;color:var(--text-secondary)">18 buscas sem estoque</div></div>
+      </div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:10px">📦 Top 3 Peças para Comprar Hoje</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:8px"><span style="font-size:20px">1️⃣</span><div><div style="font-size:13px;font-weight:600">Pastilha Cobreq — Celta/Corsa</div><div style="font-size:12px;color:var(--text-muted)">18 buscas ontem.</div></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:8px"><span style="font-size:20px">2️⃣</span><div><div style="font-size:13px;font-weight:600">Óleo Selenia 5W30</div><div style="font-size:12px;color:var(--text-muted)">Estoque em 7un. Mínimo: 20un.</div></div></div>
+        <div style="display:flex;align-items:center;gap:12px;padding:12px;background:var(--surface-2);border-radius:8px"><span style="font-size:20px">3️⃣</span><div><div style="font-size:13px;font-weight:600">Filtro de Combustível Uno</div><div style="font-size:12px;color:var(--text-muted)">4 pedidos recusados esta semana.</div></div></div>
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('insightsModal')">Fechar</button></div>
+  </div>
+</div>
+
+<!-- COMMISSION POPUP (post-sale) -->
+<div class="modal-overlay" id="commissionPopup">
+  <div class="comm-popup">
+    <div class="comm-popup-header">
+      <span style="font-size:13px;font-weight:700;color:rgba(255,255,255,.6)">🎉 Venda Registrada!</span>
+      <button class="comm-popup-close" onclick="closeModal('commissionPopup')"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="comm-popup-body">
+      <div class="comm-popup-name" id="cpName">Marcos Silva</div>
+      <div class="comm-popup-amount" id="cpAmount">R$ 210,00</div>
+      <div class="comm-popup-sub" id="cpSub">comissão desta venda</div>
+      <div class="comm-popup-grid">
+        <div class="comm-popup-stat"><div class="comm-popup-stat-label">Comissão do Mês</div><div class="comm-popup-stat-value" id="cpMonthComm">R$ 2.250</div></div>
+        <div class="comm-popup-stat"><div class="comm-popup-stat-label">Total Vendido Hoje</div><div class="comm-popup-stat-value" id="cpTodaySales">R$ 4.200</div></div>
+        <div class="comm-popup-stat"><div class="comm-popup-stat-label">Meta Mensal</div><div class="comm-popup-stat-value" id="cpMeta">R$ 15.000</div></div>
+        <div class="comm-popup-stat"><div class="comm-popup-stat-label">Regra</div><div class="comm-popup-stat-value" id="cpRule" style="font-size:13px">5% s/ venda</div></div>
+      </div>
+      <div class="comm-popup-progress-label"><span>Progresso na Meta Mensal</span><span id="cpMetaPct">28%</span></div>
+      <div class="comm-popup-progress-bar"><div class="comm-popup-progress-fill" id="cpMetaFill" style="width:28%"></div></div>
+      <div style="margin-top:8px;font-size:11px;color:rgba(255,255,255,.3);text-align:center" id="cpMetaMsg">Faltam R$ 10.800 para bater a meta!</div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:20px;padding:12px" onclick="closeModal('commissionPopup')"><i class="fas fa-check"></i> Fechar</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMMISSION CONFIG -->
+<div class="modal-overlay" id="commissionConfigModal">
+  <div class="modal modal-lg">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-cog" style="color:var(--teal);margin-right:8px"></i>Configurar Regras de Comissão <span class="manager-badge">GESTOR</span></span><button class="modal-close" onclick="closeModal('commissionConfigModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="section-divider"><i class="fas fa-sliders-h" style="color:var(--teal)"></i>Regra Geral (Padrão)</div>
+      <div style="background:var(--surface-2);border-radius:10px;padding:16px;margin-bottom:16px">
+        <div class="form-row col3">
+          <div class="form-group"><label class="form-label">Tipo de Comissão</label><select class="form-select" id="commTypeGlobal" onchange="updateCommUI()"><option value="percent">% sobre Venda</option><option value="fixed">Valor Fixo por Venda</option><option value="margin">% sobre Margem</option><option value="tiered">Escalonada por Meta</option></select></div>
+          <div class="form-group"><label class="form-label" id="commValueLabel">% Comissão Padrão</label><input class="form-input" type="number" value="5"></div>
+          <div class="form-group"><label class="form-label">Calcular sobre</label><select class="form-select"><option>Valor Total da Venda</option><option>Valor com Desconto</option><option>Apenas Produtos (sem frete)</option></select></div>
+        </div>
+        <div class="form-row col2">
+          <div class="form-group"><label class="form-label">Teto Máximo (R$) — 0 = sem teto</label><input class="form-input" type="number" value="0"></div>
+          <div class="form-group"><label class="form-label">Piso Mínimo para ganhar comissão (R$)</label><input class="form-input" type="number" value="0"></div>
+        </div>
+      </div>
+      <div id="tieredSection" style="display:none">
+        <div class="section-divider"><i class="fas fa-layer-group" style="color:var(--warning)"></i>Escalonamento por Faixa de Meta</div>
+        <table><thead><tr><th>Faixa</th><th>% Comissão</th><th></th></tr></thead>
+        <tbody id="tieredBody">
+          <tr><td><select class="form-select" style="width:180px"><option>0% a 50%</option><option>0% a 70%</option></select></td><td><input class="form-input" type="number" value="3" style="width:80px"></td><td><button class="btn btn-ghost btn-xs" onclick="this.closest('tr').remove()"><i class="fas fa-trash"></i></button></td></tr>
+          <tr><td><select class="form-select" style="width:180px"><option selected>50% a 100%</option></select></td><td><input class="form-input" type="number" value="5" style="width:80px"></td><td><button class="btn btn-ghost btn-xs" onclick="this.closest('tr').remove()"><i class="fas fa-trash"></i></button></td></tr>
+          <tr><td><select class="form-select" style="width:180px"><option selected>Acima de 100%</option></select></td><td><input class="form-input" type="number" value="8" style="width:80px"></td><td><button class="btn btn-ghost btn-xs" onclick="this.closest('tr').remove()"><i class="fas fa-trash"></i></button></td></tr>
+        </tbody></table>
+        <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addTieredRow()"><i class="fas fa-plus"></i> Adicionar Faixa</button>
+      </div>
+      <div class="section-divider" style="margin-top:8px"><i class="fas fa-star" style="color:#fbbf24"></i>Bônus & Penalidades</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+        <div class="rule-card"><div class="rule-card-icon" style="background:rgba(16,185,129,.1);color:var(--success)"><i class="fas fa-trophy"></i></div><div class="rule-card-body"><div class="rule-card-title">Bônus por Bater Meta</div><div class="rule-card-desc">Valor extra ao atingir 100% da meta</div><div style="display:flex;gap:8px;margin-top:8px"><select class="form-select" style="width:80px;height:32px;font-size:12px"><option>R$ fixo</option><option>% extra</option></select><input class="form-input" type="number" placeholder="200" style="height:32px;font-size:12px"></div></div></div>
+        <div class="rule-card"><div class="rule-card-icon" style="background:rgba(239,68,68,.08);color:var(--danger)"><i class="fas fa-minus-circle"></i></div><div class="rule-card-body"><div class="rule-card-title">Redução por Desconto Excessivo</div><div class="rule-card-desc">Se vendedor der desconto acima de X%</div><div style="display:flex;gap:6px;margin-top:8px;align-items:center;font-size:12px"><input class="form-input" type="number" placeholder="10" style="height:32px;font-size:12px;width:60px">% → Reduz <input class="form-input" type="number" placeholder="1" style="height:32px;font-size:12px;width:50px">%</div></div></div>
+      </div>
+      <div class="section-divider"><i class="fas fa-user-cog" style="color:var(--info)"></i>Regra Individual por Vendedor</div>
+      <table><thead><tr><th>Vendedor</th><th>Tipo</th><th>%/Valor</th><th>Meta Mensal</th><th>Meta Diária</th><th>Bônus Meta</th></tr></thead>
+      <tbody id="vendorRulesBody"></tbody></table>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('commissionConfigModal')">Cancelar</button><button class="btn btn-primary" onclick="saveCommRules()"><i class="fas fa-save"></i> Salvar Regras</button></div>
+  </div>
+</div>
+
+<!-- ADD VENDOR -->
+<div class="modal-overlay" id="addVendorModal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-user-plus" style="color:var(--teal);margin-right:8px"></i>Adicionar Vendedor <span class="manager-badge">GESTOR</span></span><button class="modal-close" onclick="closeModal('addVendorModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-row col2">
+        <div class="form-group"><label class="form-label">Nome Completo *</label><input class="form-input" id="nv_name" placeholder="Ex: João da Silva"></div>
+        <div class="form-group"><label class="form-label">Apelido / Login</label><input class="form-input" id="nv_alias" placeholder="Ex: joao"></div>
+      </div>
+      <div class="form-row col2">
+        <div class="form-group"><label class="form-label">WhatsApp</label><input class="form-input" id="nv_phone" placeholder="+55 41 99999-0000"></div>
+        <div class="form-group"><label class="form-label">E-mail</label><input class="form-input" type="email" id="nv_email"></div>
+      </div>
+      <div class="form-row col3">
+        <div class="form-group"><label class="form-label">Tipo de Comissão</label><select class="form-select" id="nv_commType"><option value="percent">% sobre Venda</option><option value="fixed">Valor Fixo</option><option value="margin">% sobre Margem</option><option value="tiered">Escalonada</option></select></div>
+        <div class="form-group"><label class="form-label">% / Valor</label><input class="form-input" type="number" id="nv_commPct" value="5"></div>
+        <div class="form-group"><label class="form-label">Meta Mensal (R$)</label><input class="form-input" type="number" id="nv_meta" value="15000"></div>
+      </div>
+      <div class="form-row col2">
+        <div class="form-group"><label class="form-label">Meta Diária (R$)</label><input class="form-input" type="number" id="nv_metaDaily" value="600"></div>
+        <div class="form-group"><label class="form-label">Bônus ao Bater Meta (R$)</label><input class="form-input" type="number" id="nv_bonus" value="200"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Perfil de Acesso</label>
+        <select class="form-select" id="nv_role">
+          <option value="seller">Vendedor — Mesa de Vendas, Gestão à Vista, Carrinhos Salvos, Estoque & Importação</option>
+          <option value="stock">Estoquista — Mesa de Vendas, Gestão à Vista, Carrinhos Salvos, Estoque & Importação</option>
+          <option value="manager">Gestor — Acesso total + Comissões e Configurações</option>
+        </select>
+      </div>
+      <div id="nv_validation"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('addVendorModal')">Cancelar</button><button class="btn btn-primary" onclick="addVendor()"><i class="fas fa-user-plus"></i> Cadastrar</button></div>
+  </div>
+</div>
+
+<!-- ADD PRODUCT -->
+<div class="modal-overlay" id="addProductModal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-plus-circle" style="color:var(--teal);margin-right:8px"></i>Novo Produto</span><button class="modal-close" onclick="closeModal('addProductModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Nome do Produto *</label><input class="form-input" id="np_name" placeholder="Ex: Amortecedor Corolla 2020"></div>
+      <div class="form-row col2">
+        <div class="form-group"><label class="form-label">Referência / Código</label><input class="form-input" id="np_ref" placeholder="Ex: MON-456"></div>
+        <div class="form-group"><label class="form-label">Marca</label><input class="form-input" id="np_brand"></div>
+      </div>
+      <div class="form-row col3">
+        <div class="form-group"><label class="form-label">Custo (R$) *</label><input class="form-input" type="number" id="np_cost"></div>
+        <div class="form-group"><label class="form-label">Preço Venda (R$) *</label><input class="form-input" type="number" id="np_price"></div>
+        <div class="form-group"><label class="form-label">Qtd. Inicial</label><input class="form-input" type="number" id="np_qty" value="0"></div>
+      </div>
+      <div class="form-row col2">
+        <div class="form-group"><label class="form-label">Estoque Mínimo</label><input class="form-input" type="number" id="np_min" value="5"></div>
+        <div class="form-group"><label class="form-label">Categoria</label><input class="form-input" id="np_cat"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-map-marker-alt" style="color:var(--info);margin-right:4px"></i>Localização Física no Estoque <small style="color:var(--text-muted);font-weight:400">(opcional)</small></label>
+        <input class="form-input" id="np_location" placeholder="Ex: Prateleira A3 · Gaveta 12 · Corredor B">
+        <div class="form-hint">Onde o produto está fisicamente armazenado. Aparece na Mesa de Vendas para o vendedor.</div>
+      </div>
+      <div id="np_validation"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('addProductModal')">Cancelar</button><button class="btn btn-primary" onclick="addProduct()"><i class="fas fa-plus"></i> Adicionar</button></div>
+  </div>
+</div>
+
+<!-- EDIT PRODUCT -->
+<div class="modal-overlay" id="editProductModal">
+  <div class="modal">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-edit" style="color:var(--info);margin-right:8px"></i>Editar Produto</span><button class="modal-close" onclick="closeModal('editProductModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <input type="hidden" id="ep_id">
+      <div class="form-group"><label class="form-label">Nome</label><input class="form-input" id="ep_name"></div>
+      <div class="form-row col2"><div class="form-group"><label class="form-label">Referência</label><input class="form-input" id="ep_ref"></div><div class="form-group"><label class="form-label">Marca</label><input class="form-input" id="ep_brand"></div></div>
+      <div class="form-row col3"><div class="form-group"><label class="form-label">Custo (R$)</label><input class="form-input" type="number" id="ep_cost"></div><div class="form-group"><label class="form-label">Preço Venda (R$)</label><input class="form-input" type="number" id="ep_price"></div><div class="form-group"><label class="form-label">Estoque Atual</label><input class="form-input" type="number" id="ep_qty"></div></div>
+      <div class="form-row col2"><div class="form-group"><label class="form-label">Mínimo</label><input class="form-input" type="number" id="ep_min"></div><div class="form-group"><label class="form-label">Categoria</label><input class="form-input" id="ep_cat"></div></div>
+      <div class="form-group">
+        <label class="form-label"><i class="fas fa-map-marker-alt" style="color:var(--info);margin-right:4px"></i>Localização Física <small style="color:var(--text-muted);font-weight:400">(opcional)</small></label>
+        <input class="form-input" id="ep_location" placeholder="Ex: Prateleira A3 · Gaveta 12">
+      </div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('editProductModal')">Cancelar</button><button class="btn btn-primary" onclick="saveEditProduct()"><i class="fas fa-save"></i> Salvar</button></div>
+  </div>
+</div>
+
+<!-- BULK ADD -->
+<div class="modal-overlay" id="bulkAddModal">
+  <div class="modal modal-lg">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-layer-group" style="color:var(--success);margin-right:8px"></i>Adicionar Produtos em Massa</span><button class="modal-close" onclick="closeModal('bulkAddModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="validation-msg info-msg" style="margin-bottom:14px"><i class="fas fa-info-circle"></i> Cole dados de uma planilha (Excel/Sheets). Use <strong>Tab</strong> entre colunas e <strong>Enter</strong> entre linhas.<br><strong>Formato:</strong> Nome | Referência | Custo | Preço Venda | Quantidade | Mínimo | Localização</div>
+      <div class="form-group"><label class="form-label">Cole os dados aqui (Ctrl+V)</label><textarea class="form-textarea" id="bulkPasteArea" rows="9" oninput="parseBulk()"></textarea></div>
+      <div id="bulkPreview"></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('bulkAddModal')">Cancelar</button><button class="btn btn-primary" id="bulkConfirmBtn" onclick="confirmBulk()" disabled><i class="fas fa-check"></i> Confirmar</button></div>
+  </div>
+</div>
+
+<!-- CSV -->
+<div class="modal-overlay" id="csvModal">
+  <div class="modal modal-lg">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-file-csv" style="color:var(--success);margin-right:8px"></i>Importar CSV</span><button class="modal-close" onclick="closeModal('csvModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="steps"><div class="step active" id="csvStep1"><div class="step-num">1</div> Upload</div><div class="step" id="csvStep2"><div class="step-num">2</div> Mapear</div><div class="step" id="csvStep3"><div class="step-num">3</div> Validar</div></div>
+      <div id="csvPane1"><div class="upload-zone" onclick="document.getElementById('csvFileInput').click()"><i class="fas fa-file-csv"></i><h5>Clique para selecionar CSV</h5><p>Exportado de qualquer planilha</p></div><input type="file" id="csvFileInput" accept=".csv" onchange="handleCSV(event)"></div>
+      <div id="csvPane2" style="display:none"><div id="colMapperRows"></div><div id="validationMsg"></div></div>
+      <div id="csvPane3" style="display:none"><div class="validation-msg success"><i class="fas fa-check-circle"></i> <strong id="validCount">0 itens</strong> prontos para importar.</div><div id="csvPreviewTable" style="margin-top:10px"></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('csvModal')">Cancelar</button><button class="btn btn-primary" id="csvNextBtn" onclick="csvNext()">Próximo →</button></div>
+  </div>
+</div>
+
+<!-- XML -->
+<div class="modal-overlay" id="xmlModal">
+  <div class="modal modal-lg">
+    <div class="modal-header"><span class="modal-title"><i class="fas fa-file-code" style="color:var(--info);margin-right:8px"></i>Importar XML NF-e</span><button class="modal-close" onclick="closeModal('xmlModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="steps"><div class="step active">1 — Upload</div><div class="step" id="xmlStep2">2 — Revisar Custos</div><div class="step" id="xmlStep3">3 — Confirmar</div></div>
+      <div id="xmlPane1"><div class="upload-zone" onclick="document.getElementById('xmlFileInput').click()"><i class="fas fa-file-code" style="color:var(--info)"></i><h5>Selecionar XML da NF-e</h5><p>O sistema extrai itens e exibe revisão antes de atualizar.</p></div><input type="file" id="xmlFileInput" accept=".xml" onchange="handleXML(event)"><div style="margin-top:14px;background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.15);border-radius:10px;padding:12px;font-size:12px;color:var(--text-secondary)">Tags: <code style="background:var(--surface-2);padding:1px 5px;border-radius:4px">&lt;xProd&gt;</code> <code style="background:var(--surface-2);padding:1px 5px;border-radius:4px">&lt;qCom&gt;</code> <code style="background:var(--surface-2);padding:1px 5px;border-radius:4px">&lt;vUnCom&gt;</code></div></div>
+      <div id="xmlPane2" style="display:none"><div class="validation-msg warn" style="margin-bottom:12px"><i class="fas fa-exclamation-triangle"></i> Revise os custos. Itens com alteração estão destacados.</div><div class="table-wrap"><table class="xml-diff-table"><thead><tr><th>Produto</th><th>Qtd</th><th>Custo Ant.</th><th>Custo Novo</th><th>Var.</th></tr></thead><tbody id="xmlPreviewBody"></tbody></table></div></div>
+    </div>
+    <div class="modal-footer"><button class="btn btn-ghost" onclick="closeModal('xmlModal')">Cancelar</button><button class="btn btn-primary" id="xmlNextBtn" onclick="xmlNext()">Processar XML →</button></div>
+  </div>
+</div>
+
+<!-- PACKING LIST -->
+<div class="modal-overlay" id="packingModal">
+  <div class="modal modal-sm">
+    <div class="modal-header non-print"><span class="modal-title"><i class="fas fa-print" style="color:var(--teal);margin-right:8px"></i>Packing List</span><button class="modal-close" onclick="closeModal('packingModal')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="packingContent" style="padding:16px"></div>
+    <div class="modal-footer non-print"><button class="btn btn-ghost" onclick="closeModal('packingModal')">Fechar</button><button class="btn btn-primary" onclick="window.print()"><i class="fas fa-print"></i> Imprimir</button></div>
+  </div>
+</div>
+
+<!-- PRINT AREA — only this gets printed -->
+<div id="printArea"></div>
+
+<script>
+// ═══ DATA ═══
+let VENDORS = [
+  {id:'v1',name:'Marcos Silva',alias:'marcos',commType:'percent',commPct:5,metaMonthly:15000,metaDaily:600,bonus:200,todaySales:4200,todayComm:210,monthSales:45000,monthComm:2250},
+  {id:'v2',name:'Ana Paula',alias:'ana',commType:'tiered',commPct:5,metaMonthly:12000,metaDaily:500,bonus:150,todaySales:2800,todayComm:140,monthSales:38000,monthComm:1900},
+  {id:'v3',name:'Carlos Mendes',alias:'carlos',commType:'percent',commPct:4,metaMonthly:10000,metaDaily:400,bonus:100,todaySales:1900,todayComm:76,monthSales:29000,monthComm:1160},
+];
+
+let PRODUCTS = [
+  {id:'101',name:'Amortecedor Corolla 2018',ref:'MON-123',brand:'Monroe',cost:280,price:450,stock:14,min:5,cat:'Suspensão',location:'Corredor A · Prateleira 3'},
+  {id:'102',name:'Pastilha de Freio Celta',ref:'COB-998',brand:'Cobreq',cost:42,price:85,stock:0,min:10,cat:'Freios',location:'Corredor B · Gaveta 7'},
+  {id:'103',name:'Óleo Selenia 5W30 1L',ref:'SEL-440',brand:'Selenia',cost:28,price:55,stock:7,min:20,cat:'Lubrificantes',location:''},
+  {id:'104',name:'Kit Coxim Dianteiro Gol',ref:'COX-201',brand:'SL',cost:65,price:120,stock:9,min:3,cat:'Suspensão',location:'Corredor A · Prateleira 5'},
+  {id:'105',name:'Filtro de Combustível Uno',ref:'FIL-330',brand:'Mann',cost:18,price:38,stock:3,min:8,cat:'Filtros',location:''},
+  {id:'106',name:'Pastilha Cobreq Strada',ref:'CBQ-120',brand:'Cobreq',cost:47,price:95,stock:0,min:10,cat:'Freios',location:'Corredor B · Gaveta 9'},
+];
+
+const ORDERS = [
+  {id:'#1042',seller:'Marcos',items:'2x Amortecedor Corolla\n1x Kit Coxim',minutes:25},
+  {id:'#1043',seller:'Ana',items:'4x Óleo Selenia 5W30\n1x Filtro de Combustível',minutes:14},
+  {id:'#1045',seller:'Carlos',items:'1x Pastilha Cobreq Strada',minutes:3},
+];
+
+let SAVED_QUOTES = [
+  {id:'ORC-001',sellerId:'v2',sellerName:'Ana Paula',items:[{name:'Amortecedor Corolla 2018',ref:'MON-123',price:450,qty:2},{name:'Kit Coxim Dianteiro Gol',ref:'COX-201',price:120,qty:1}],total:1020,savedAt:'22/02 14:35',clientName:'Oficina do Zé'},
+  {id:'ORC-002',sellerId:'v1',sellerName:'Marcos Silva',items:[{name:'Óleo Selenia 5W30 1L',ref:'SEL-440',price:55,qty:4}],total:220,savedAt:'22/02 16:10',clientName:'Auto Peças Rápido'},
+];
+
+// Vendas do dia — somem à meia-noite (protótipo: persistem na sessão)
+let SALES_TODAY = [
+  {id:'VND-1040',time:'08:12',sellerId:'v1',sellerName:'Marcos Silva',items:[{name:'Amortecedor Corolla 2018',ref:'MON-123',price:450,qty:2},{name:'Kit Coxim Dianteiro Gol',ref:'COX-201',price:120,qty:1}],total:1020,comm:51,commPct:5,status:'ok'},
+  {id:'VND-1041',time:'09:35',sellerId:'v3',sellerName:'Carlos Mendes',items:[{name:'Filtro de Combustível Uno',ref:'FIL-330',price:38,qty:3}],total:114,comm:4.56,commPct:4,status:'ok'},
+  {id:'VND-1042',time:'10:48',sellerId:'v2',sellerName:'Ana Paula',items:[{name:'Óleo Selenia 5W30 1L',ref:'SEL-440',price:55,qty:6}],total:330,comm:16.5,commPct:5,status:'ok'},
+  {id:'VND-1043',time:'11:20',sellerId:'v1',sellerName:'Marcos Silva',items:[{name:'Amortecedor Corolla 2018',ref:'MON-123',price:450,qty:1}],total:450,comm:22.5,commPct:5,status:'ok'},
+  {id:'VND-1044',time:'13:05',sellerId:'v2',sellerName:'Ana Paula',items:[{name:'Kit Coxim Dianteiro Gol',ref:'COX-201',price:120,qty:2},{name:'Filtro de Combustível Uno',ref:'FIL-330',price:38,qty:4}],total:392,comm:19.6,commPct:5,status:'ok'},
+  {id:'VND-1045',time:'14:33',sellerId:'v3',sellerName:'Carlos Mendes',items:[{name:'Óleo Selenia 5W30 1L',ref:'SEL-440',price:55,qty:4}],total:220,comm:8.8,commPct:4,status:'estornada'},
+  {id:'VND-1046',time:'15:50',sellerId:'v1',sellerName:'Marcos Silva',items:[{name:'Amortecedor Corolla 2018',ref:'MON-123',price:450,qty:3}],total:1350,comm:67.5,commPct:5,status:'ok'},
+  {id:'VND-1047',time:'17:22',sellerId:'v2',sellerName:'Ana Paula',items:[{name:'Kit Coxim Dianteiro Gol',ref:'COX-201',price:120,qty:1},{name:'Óleo Selenia 5W30 1L',ref:'SEL-440',price:55,qty:2}],total:230,comm:11.5,commPct:5,status:'ok'},
+];
+
+let cart = [];
+let selectedSellerId = null;
+let activeQuoteId = null; // tracks if cart was loaded from a saved quote
+let csvStep=1, csvHeaders=[], parsedCSV=[];
+const FIELDS=['Nome','Custo','Preco_Venda','Quantidade','Referencia'];
+let xmlStep=1, xmlItems=[];
+const XML_DEMO=[
+  {nome:'Amortecedor Corolla 2018',qty:10,oldCost:280,newCost:295},
+  {nome:'Pastilha de Freio Celta',qty:50,oldCost:42,newCost:42},
+  {nome:'Óleo Selenia 5W30 1L',qty:120,oldCost:28,newCost:31},
+  {nome:'Filtro Combustível Uno',qty:30,oldCost:18,newCost:18},
+];
+let bulkParsed=[];
+
+// ═══ HELPERS ═══
+const fmt = v=>'R$ '+v.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const openModal = id=>document.getElementById(id).classList.add('open');
+const closeModal = id=>document.getElementById(id).classList.remove('open');
+function togglePopup(){document.getElementById('progressPopup').classList.toggle('open');}
+function toggleSwitch(row){const t=row.querySelector('.toggle');if(t)t.classList.toggle('on');}
+function updateCommUI(){
+  const t=document.getElementById('commTypeGlobal').value;
+  document.getElementById('commValueLabel').textContent=t==='fixed'?'Valor Fixo (R$)':t==='margin'?'% sobre Margem':t==='tiered'?'% Base':' % Comissão';
+  document.getElementById('tieredSection').style.display=t==='tiered'?'block':'none';
+}
+function addTieredRow(){const tr=document.createElement('tr');tr.innerHTML=`<td><input class="form-input" placeholder="Ex: 50% a 80%" style="width:180px"></td><td><input class="form-input" type="number" value="6" style="width:80px"></td><td><button class="btn btn-ghost btn-xs" onclick="this.closest('tr').remove()"><i class="fas fa-trash"></i></button></td>`;document.getElementById('tieredBody').appendChild(tr);}
+function saveCommRules(){closeModal('commissionConfigModal');confetti({particleCount:60,spread:50,origin:{y:.4}});alert('✅ Regras salvas!');}
+
+// ═══ NAVIGATION ═══
+function navigate(view, el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById(view).classList.add('active');
+  if(el)el.classList.add('active');
+  const titles={dashboard:'Dashboard Geral',vendas:'Mesa de Vendas (PDV)',fila:'Gestão à Vista',comissoes:'Gestão de Comissões',carrinhos:'Carrinhos Salvos',vendasHoje:'Vendas Hoje',vendedores:'Vendedores',estoque:'Estoque & Importação',integracoes:'Integrações & Conexões',auditoria:'Auditoria do Guardião',config:'Configurações'};
+  document.getElementById('pageTitle').textContent=titles[view]||view;
+  if(view==='vendas'){setTimeout(()=>document.getElementById('metaBarFill').style.width='72%',300);renderSellerChips();renderProducts();}
+  if(view==='fila')renderOrders();
+  if(view==='comissoes')renderCommissionExtract();
+  if(view==='estoque')renderStock();
+  if(view==='carrinhos'){renderSavedQuotes();renderFilterOptions();}
+  if(view==='vendasHoje'){renderVendasHoje();renderVendasHojeFilter();}
+  if(view==='vendedores'){renderVendedores();searchSales('__all__');}
+  if(view==='integracoes'){navigate_integracoes_update('integracoes');}
+}
+
+// ═══ CHART ═══
+window.addEventListener('load',()=>{
+  new Chart(document.getElementById('chartVendas').getContext('2d'),{
+    data:{labels:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'],datasets:[
+      {type:'line',label:'Realizadas',data:[18000,22000,15000,19000,23000,16000,18440],borderColor:'#00897b',backgroundColor:'rgba(0,137,123,.08)',fill:true,tension:.4,borderWidth:2.5,pointRadius:4,pointBackgroundColor:'#00897b'},
+      {type:'line',label:'Perdidas',data:[800,1200,600,1800,2100,500,1250],borderColor:'#ef4444',backgroundColor:'rgba(239,68,68,.06)',fill:true,tension:.4,borderWidth:2,pointRadius:4,pointBackgroundColor:'#ef4444',borderDash:[4,3]}
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:true,position:'bottom',labels:{font:{size:12,family:'DM Sans'},usePointStyle:true,padding:20}}},scales:{y:{beginAtZero:true,grid:{color:'rgba(0,0,0,.04)'},ticks:{callback:v=>'R$'+v.toLocaleString('pt-BR')}},x:{grid:{display:false}}}}
+  });
+  renderProducts();
+  renderSellerChips();
+  renderCommissionExtract();
+  renderStock();
+  renderVendorRules();
+  updateCartBadge();
+  updateVendasHojeBadge();
+});
+
+// ═══ SELLER CHIPS ═══
+function renderSellerChips(){
+  const c=document.getElementById('sellerChips');if(!c)return;
+  c.innerHTML=VENDORS.map(v=>`<div class="seller-chip ${selectedSellerId===v.id?'selected':''}" onclick="selectSeller('${v.id}')">${v.name.split(' ')[0]}</div>`).join('');
+}
+function selectSeller(id){
+  selectedSellerId=selectedSellerId===id?null:id;
+  renderSellerChips();
+}
+
+// ═══ PRODUCTS TABLE ═══
+function renderProducts(filter=''){
+  const tbody=document.getElementById('productTbody');if(!tbody)return;
+  const list=PRODUCTS.filter(p=>p.name.toLowerCase().includes(filter.toLowerCase())||p.ref.toLowerCase().includes(filter.toLowerCase()));
+  tbody.innerHTML=list.map(p=>{
+    const sb=p.stock===0?`<span class="badge badge-danger">ZERADO</span>`:p.stock<p.min?`<span class="badge badge-warning">${p.stock}</span>`:`<span class="badge badge-success">${p.stock}</span>`;
+    const loc=p.location?`<span class="location-badge"><i class="fas fa-map-marker-alt"></i>${p.location}</span>`:`<span style="color:var(--text-muted);font-size:11px">—</span>`;
+    const act=p.stock>0?`<button class="btn btn-primary btn-sm" onclick="addToCart('${p.id}')"><i class="fas fa-plus"></i></button>`:`<button class="btn-lost" onclick="registerLost('${p.id}')">Perdida</button>`;
+    return `<tr><td><strong style="font-size:13px">${p.name}</strong><br><small style="color:var(--text-muted)">${p.ref}</small></td><td>${loc}</td><td>${sb}</td><td style="font-family:'DM Mono',monospace;font-weight:600">${fmt(p.price)}</td><td>${act}</td></tr>`;
+  }).join('');
+}
+function filterProducts(v){renderProducts(v);}
+
+// ═══ STOCK TABLE ═══
+function renderStock(){
+  const tbody=document.getElementById('stockTbody');if(!tbody)return;
+  tbody.innerHTML=PRODUCTS.map(p=>{
+    const sb=p.stock===0?`<span class="badge badge-danger">ZERADO</span>`:p.stock<p.min?`<span class="badge badge-warning">BAIXO</span>`:`<span class="badge badge-success">OK</span>`;
+    const loc=p.location?`<span class="location-badge"><i class="fas fa-map-marker-alt"></i>${p.location}</span>`:`<span style="color:var(--text-muted);font-size:11px">—</span>`;
+    return `<tr>
+      <td style="font-size:11px;color:var(--text-muted);font-family:'DM Mono',monospace">${p.id}</td>
+      <td><strong>${p.name}</strong><br><small style="color:var(--text-muted)">${p.brand}</small></td>
+      <td>${loc}</td>
+      <td>${p.min}</td>
+      <td style="font-weight:700;color:${p.stock===0?'var(--danger)':p.stock<p.min?'var(--warning)':'inherit'}">${p.stock}</td>
+      <td style="font-family:'DM Mono',monospace">${fmt(p.cost)}</td>
+      <td style="font-family:'DM Mono',monospace">${fmt(p.price)}</td>
+      <td>${sb}</td>
+      <td><div style="display:flex;gap:5px">
+        <button class="btn btn-ghost btn-xs" onclick="openEditProduct('${p.id}')" title="Editar"><i class="fas fa-edit" style="color:var(--info)"></i></button>
+        <button class="btn btn-ghost btn-xs" onclick="adjustQty('${p.id}')" title="Ajustar Qtd"><i class="fas fa-boxes" style="color:var(--teal)"></i></button>
+        <button class="btn btn-ghost btn-xs" onclick="deleteProduct('${p.id}')" title="Excluir"><i class="fas fa-trash" style="color:var(--danger)"></i></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+}
+function openEditProduct(id){
+  const p=PRODUCTS.find(x=>x.id===id);if(!p)return;
+  ['id','name','ref','brand','cost','price','qty','min','cat','location'].forEach(f=>{const el=document.getElementById('ep_'+f);if(el)el.value=f==='qty'?p.stock:p[f]||'';});
+  document.getElementById('ep_id').value=p.id;
+  openModal('editProductModal');
+}
+function saveEditProduct(){
+  const id=document.getElementById('ep_id').value;
+  const p=PRODUCTS.find(x=>x.id===id);if(!p)return;
+  p.name=document.getElementById('ep_name').value;p.ref=document.getElementById('ep_ref').value;
+  p.brand=document.getElementById('ep_brand').value;p.cost=parseFloat(document.getElementById('ep_cost').value)||p.cost;
+  p.price=parseFloat(document.getElementById('ep_price').value)||p.price;p.stock=parseInt(document.getElementById('ep_qty').value)||0;
+  p.min=parseInt(document.getElementById('ep_min').value)||0;p.cat=document.getElementById('ep_cat').value;
+  p.location=document.getElementById('ep_location').value;
+  closeModal('editProductModal');renderStock();renderProducts();
+}
+function adjustQty(id){const p=PRODUCTS.find(x=>x.id===id);if(!p)return;const v=prompt(`Ajustar quantidade de "${p.name}"\nAtual: ${p.stock}\n\nNova quantidade:`);if(v!==null){const n=parseInt(v);if(!isNaN(n)){p.stock=n;renderStock();renderProducts();}}}
+function deleteProduct(id){if(!confirm('Excluir este produto?'))return;const i=PRODUCTS.findIndex(x=>x.id===id);if(i>-1){PRODUCTS.splice(i,1);renderStock();renderProducts();}}
+
+// ═══ ADD PRODUCT ═══
+function addProduct(){
+  const name=document.getElementById('np_name').value.trim();
+  const cost=parseFloat(document.getElementById('np_cost').value);
+  const price=parseFloat(document.getElementById('np_price').value);
+  if(!name||!cost||!price){document.getElementById('np_validation').innerHTML='<div class="validation-msg error"><i class="fas fa-times-circle"></i> Nome, Custo e Preço são obrigatórios.</div>';return;}
+  PRODUCTS.unshift({id:String(Date.now()).slice(-5),name,ref:document.getElementById('np_ref').value,brand:document.getElementById('np_brand').value,cost,price,stock:parseInt(document.getElementById('np_qty').value)||0,min:parseInt(document.getElementById('np_min').value)||5,cat:document.getElementById('np_cat').value,location:document.getElementById('np_location').value});
+  closeModal('addProductModal');renderStock();renderProducts();
+  ['np_name','np_ref','np_brand','np_cost','np_price','np_qty','np_cat','np_location'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('np_validation').innerHTML='';
+}
+
+// ═══ BULK ADD ═══
+function parseBulk(){
+  const text=document.getElementById('bulkPasteArea').value.trim();
+  const btn=document.getElementById('bulkConfirmBtn');
+  const preview=document.getElementById('bulkPreview');
+  if(!text){preview.innerHTML='';btn.disabled=true;return;}
+  const lines=text.split('\n').filter(l=>l.trim());
+  bulkParsed=lines.map(l=>{const c=l.split('\t');return{name:c[0]||'',ref:c[1]||'',cost:parseFloat(c[2])||0,price:parseFloat(c[3])||0,stock:parseInt(c[4])||0,min:parseInt(c[5])||5,location:c[6]||''};}).filter(r=>r.name);
+  if(!bulkParsed.length){preview.innerHTML='<div class="validation-msg error">Nenhum dado reconhecido.</div>';btn.disabled=true;return;}
+  preview.innerHTML=`<div class="validation-msg success" style="margin-bottom:10px"><i class="fas fa-check-circle"></i> <strong>${bulkParsed.length} produtos</strong> identificados.</div><table><thead><tr><th>Nome</th><th>Custo</th><th>Preço</th><th>Qtd</th><th>Localização</th></tr></thead><tbody>${bulkParsed.slice(0,5).map(r=>`<tr><td>${r.name}</td><td>${fmt(r.cost)}</td><td>${fmt(r.price)}</td><td>${r.stock}</td><td>${r.location||'—'}</td></tr>`).join('')}</tbody></table>${bulkParsed.length>5?`<p style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:6px">...e mais ${bulkParsed.length-5} itens</p>`:''}`;
+  btn.disabled=false;
+}
+function confirmBulk(){
+  bulkParsed.forEach((r,i)=>PRODUCTS.unshift({id:String(Date.now()+i).slice(-5),name:r.name,ref:r.ref,brand:'',cost:r.cost,price:r.price,stock:r.stock,min:r.min,cat:'',location:r.location}));
+  closeModal('bulkAddModal');renderStock();renderProducts();
+  document.getElementById('bulkPasteArea').value='';document.getElementById('bulkPreview').innerHTML='';document.getElementById('bulkConfirmBtn').disabled=true;
+  confetti({particleCount:100,spread:70,origin:{y:.5}});alert(`✅ ${bulkParsed.length} produtos importados!`);bulkParsed=[];
+}
+
+// ═══ ADD VENDOR ═══
+function addVendor(){
+  const name=document.getElementById('nv_name').value.trim();
+  if(!name){document.getElementById('nv_validation').innerHTML='<div class="validation-msg error">Nome obrigatório.</div>';return;}
+  const newV={id:'v'+(VENDORS.length+1),name,alias:document.getElementById('nv_alias').value,commType:document.getElementById('nv_commType').value,commPct:parseFloat(document.getElementById('nv_commPct').value)||5,metaMonthly:parseFloat(document.getElementById('nv_meta').value)||15000,metaDaily:parseFloat(document.getElementById('nv_metaDaily').value)||600,bonus:parseFloat(document.getElementById('nv_bonus').value)||200,todaySales:0,todayComm:0,monthSales:0,monthComm:0};
+  VENDORS.push(newV);
+  closeModal('addVendorModal');renderSellerChips();renderCommissionExtract();renderVendorRules();renderFilterOptions();
+  confetti({particleCount:60,spread:50,origin:{y:.4}});
+  alert(`✅ Vendedor "${name}" cadastrado!`);
+  document.getElementById('nv_name').value='';document.getElementById('nv_validation').innerHTML='';
+}
+
+// ═══ VENDOR RULES ═══
+function renderVendorRules(){
+  const tbody=document.getElementById('vendorRulesBody');if(!tbody)return;
+  const typeLabel={percent:'% s/ Venda',fixed:'Fixo',margin:'% Margem',tiered:'Escalonada'};
+  tbody.innerHTML=VENDORS.map(v=>`<tr>
+    <td><strong>${v.name}</strong></td>
+    <td><span class="badge badge-neutral">${typeLabel[v.commType]}</span></td>
+    <td>${v.commPct}%</td>
+    <td style="font-family:'DM Mono',monospace">${fmt(v.metaMonthly)}</td>
+    <td style="font-family:'DM Mono',monospace">${fmt(v.metaDaily)}</td>
+    <td style="font-family:'DM Mono',monospace">${fmt(v.bonus)}</td>
+  </tr>`).join('');
+}
+
+// ═══ COMMISSION EXTRACT ═══
+function renderCommissionExtract(){
+  const tbody=document.getElementById('commissionExtract');if(!tbody)return;
+  const tl={percent:'% s/ venda',tiered:'Escalonada',fixed:'Fixo',margin:'% Margem'};
+  tbody.innerHTML=VENDORS.map(v=>{
+    const pct=Math.round((v.monthSales/v.metaMonthly)*100);
+    const pctColor=pct>=100?'var(--success)':pct>=70?'var(--warning)':'var(--danger)';
+    return `<tr>
+      <td><strong>${v.name}</strong></td>
+      <td style="font-family:'DM Mono',monospace">${fmt(v.monthSales)}</td>
+      <td><span class="badge badge-neutral">${tl[v.commType]}</span></td>
+      <td>${v.commPct}%</td>
+      <td><strong style="font-family:'DM Mono',monospace">${fmt(v.monthComm)}</strong></td>
+      <td style="font-family:'DM Mono',monospace">${fmt(v.metaMonthly)}</td>
+      <td><span style="font-weight:700;color:${pctColor}">${pct}%</span></td>
+      <td><span class="badge ${pct>=100?'badge-success':'badge-warning'}">${pct>=100?'Pago':'Pendente'}</span></td>
+      <td><button class="btn btn-${pct>=100?'ghost':'primary'} btn-xs">${pct>=100?'Detalhes':'Marcar Pago'}</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ CART ═══
+function addToCart(id){const p=PRODUCTS.find(x=>x.id===id);if(!p||p.stock===0)return;const e=cart.find(x=>x.id===id);if(e)e.qty++;else cart.push({...p,qty:1});renderCart();}
+function removeFromCart(id){cart=cart.filter(x=>x.id!==id);renderCart();}
+function changeQty(id,d){const i=cart.find(x=>x.id===id);if(i)i.qty=Math.max(1,i.qty+d);renderCart();}
+function clearCart(){cart=[];renderCart();}
+function renderCart(){
+  const body=document.getElementById('cartBody'),footer=document.getElementById('cartFooter');
+  if(cart.length===0){body.innerHTML=`<div class="cart-empty"><i class="fas fa-shopping-cart" style="font-size:28px;margin-bottom:10px;opacity:.2"></i><span style="font-size:13px">Carrinho vazio</span></div>`;footer.style.display='none';return;}
+  body.innerHTML=cart.map(i=>`<div class="cart-item"><div class="cart-item-info"><div class="cart-item-name">${i.name}</div><div class="cart-item-ref">${i.ref}</div></div><div class="qty-control"><button class="qty-btn" onclick="changeQty('${i.id}',-1)">−</button><span class="qty-val">${i.qty}</span><button class="qty-btn" onclick="changeQty('${i.id}',1)">+</button></div><div class="cart-item-price">${fmt(i.price*i.qty)}</div><button class="cart-item-remove" onclick="removeFromCart('${i.id}')"><i class="fas fa-times"></i></button></div>`).join('');
+  document.getElementById('cartTotal').textContent=fmt(cart.reduce((s,i)=>s+(i.price*i.qty),0));
+  footer.style.display='block';
+}
+
+// ═══ FINALIZAR VENDA (com popup de comissão) ═══
+function finalizarVenda(){
+  if(cart.length===0)return;
+  const total=cart.reduce((s,i)=>s+(i.price*i.qty),0);
+  const vendor=VENDORS.find(v=>v.id===selectedSellerId)||VENDORS[0];
+  const commEarned=total*vendor.commPct/100;
+  vendor.todaySales+=total;vendor.todayComm+=commEarned;
+  vendor.monthSales+=total;vendor.monthComm+=commEarned;
+  confetti({particleCount:140,spread:90,origin:{y:.6},colors:['#00897b','#26a69a','#fff','#fbbf24']});
+  // populate commission popup
+  document.getElementById('cpName').textContent=vendor.name;
+  document.getElementById('cpAmount').textContent=fmt(commEarned);
+  document.getElementById('cpSub').textContent=`comissão desta venda (${vendor.commPct}%)`;
+  document.getElementById('cpMonthComm').textContent=fmt(vendor.monthComm);
+  document.getElementById('cpTodaySales').textContent=fmt(vendor.todaySales);
+  document.getElementById('cpMeta').textContent=fmt(vendor.metaMonthly);
+  document.getElementById('cpRule').textContent={percent:`${vendor.commPct}% s/ venda`,fixed:`R$ ${vendor.commPct} fixo`,margin:`${vendor.commPct}% margem`,tiered:'Escalonada'}[vendor.commType];
+  const metaPct=Math.min(100,Math.round((vendor.monthSales/vendor.metaMonthly)*100));
+  document.getElementById('cpMetaPct').textContent=metaPct+'%';
+  document.getElementById('cpMetaFill').style.width=metaPct+'%';
+  const diff=vendor.metaMonthly-vendor.monthSales;
+  document.getElementById('cpMetaMsg').textContent=diff>0?`Faltam ${fmt(diff)} para bater a meta!`:'🏆 Meta mensal batida! Parabéns!';
+  // registrar em Vendas Hoje
+  const saleId='VND-'+Math.floor(Math.random()*900+1048);
+  const now2=new Date();
+  SALES_TODAY.unshift({id:saleId,time:now2.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'}),sellerId:vendor.id,sellerName:vendor.name,items:cart.map(i=>({name:i.name,ref:i.ref,price:i.price,qty:i.qty})),total,comm:commEarned,commPct:vendor.commPct,status:'ok'});
+  updateVendasHojeBadge();
+  // se a venda veio de um orçamento salvo, remove ele automaticamente
+  if(activeQuoteId){
+    SAVED_QUOTES=SAVED_QUOTES.filter(q=>q.id!==activeQuoteId);
+    activeQuoteId=null;
+    updateCartBadge();
+  }
+  cart=[];renderCart();
+  setTimeout(()=>openModal('commissionPopup'),400);
+}
+
+// ═══ GUARDAR ORÇAMENTO ═══
+function guardarOrcamento(){
+  if(cart.length===0){alert('Adicione produtos ao carrinho primeiro.');return;}
+  const vendor=VENDORS.find(v=>v.id===selectedSellerId);
+  const clientName=prompt('Nome do cliente (opcional):','')||'—';
+  const newQ={
+    id:'ORC-'+String(Date.now()).slice(-4),
+    sellerId:vendor?vendor.id:null,
+    sellerName:vendor?vendor.name:'Sem vendedor',
+    items:cart.map(i=>({name:i.name,ref:i.ref,price:i.price,qty:i.qty})),
+    total:cart.reduce((s,i)=>s+(i.price*i.qty),0),
+    savedAt:new Date().toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}),
+    clientName
+  };
+  SAVED_QUOTES.push(newQ);
+  cart=[];renderCart();updateCartBadge();
+  alert(`✅ Orçamento ${newQ.id} guardado!\nCliente: ${clientName}\nAcesse em "Carrinhos Salvos" na barra lateral.`);
+}
+
+function updateCartBadge(){
+  const b=document.getElementById('cartBadge');
+  if(SAVED_QUOTES.length>0){b.textContent=SAVED_QUOTES.length;b.style.display='inline';}
+  else{b.style.display='none';}
+  const c=document.getElementById('savedCartCount');if(c)c.textContent=SAVED_QUOTES.length;
+}
+
+// ═══ SAVED QUOTES ═══
+function renderFilterOptions(){
+  const sel=document.getElementById('filterQuoteSeller');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Todos os vendedores</option>'+VENDORS.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');
+  sel.value=cur;
+}
+function renderSavedQuotes(){
+  const container=document.getElementById('savedQuotesList');if(!container)return;
+  const filterSeller=document.getElementById('filterQuoteSeller')?.value||'';
+  const filtered=SAVED_QUOTES.filter(q=>!filterSeller||q.sellerId===filterSeller);
+  if(filtered.length===0){container.innerHTML=`<div style="text-align:center;padding:60px;color:var(--text-muted)"><i class="fas fa-shopping-cart" style="font-size:48px;opacity:.15;display:block;margin-bottom:16px"></i><div style="font-size:15px;font-weight:600">Nenhum orçamento pendente</div><div style="font-size:13px;margin-top:6px">Orçamentos guardados na Mesa de Vendas aparecerão aqui</div></div>`;return;}
+  container.innerHTML=filtered.map(q=>`
+    <div class="quote-card">
+      <div class="quote-header">
+        <div>
+          <div class="quote-id">${q.id} <span style="font-size:12px;color:var(--text-muted);font-weight:400">· ${q.clientName}</span></div>
+          <div style="margin-top:4px"><span class="quote-seller"><i class="fas fa-user"></i>${q.sellerName}</span></div>
+        </div>
+        <div style="text-align:right">
+          <div class="quote-time"><i class="fas fa-clock" style="margin-right:3px"></i>${q.savedAt}</div>
+        </div>
+      </div>
+      <div class="quote-items">${q.items.map(i=>`${i.qty}x ${i.name} — ${fmt(i.price*i.qty)}`).join('<br>')}</div>
+      <div class="quote-footer">
+        <div class="quote-total">${fmt(q.total)}</div>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="loadQuoteToCart('${q.id}')"><i class="fas fa-shopping-cart"></i> Carregar no PDV</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="deleteQuote('${q.id}')"><i class="fas fa-trash"></i> Excluir</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function loadQuoteToCart(id){
+  const q=SAVED_QUOTES.find(x=>x.id===id);if(!q)return;
+  cart=q.items.map(i=>({...PRODUCTS.find(p=>p.ref===i.ref)||{id:i.ref,name:i.name,ref:i.ref,price:i.price},qty:i.qty,price:i.price}));
+  selectedSellerId=q.sellerId;
+  activeQuoteId=id; // remember which quote this came from
+  renderCart();renderSellerChips();
+  // navigate to PDV
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item')[1].classList.add('active');
+  navigate('vendas',null);
+  document.getElementById('pageTitle').textContent='Mesa de Vendas (PDV)';
+}
+function deleteQuote(id){
+  if(!confirm('Excluir este orçamento?'))return;
+  SAVED_QUOTES=SAVED_QUOTES.filter(q=>q.id!==id);
+  updateCartBadge();renderSavedQuotes();
+}
+
+// ═══ WHATSAPP + PACKING LIST ═══
+function whatsappOrcamento(){
+  if(!cart.length)return;
+  const lines=cart.map(i=>`• ${i.qty}x ${i.name} — ${fmt(i.price*i.qty)}`).join('\n');
+  const total=cart.reduce((s,i)=>s+(i.price*i.qty),0);
+  window.open('https://wa.me/?text='+encodeURIComponent(`*Orçamento AutoFlow*\n${new Date().toLocaleDateString('pt-BR')}\n\n${lines}\n\n*Total: ${fmt(total)}*\n\n_Válido por 24h_`),'_blank');
+}
+function imprimirPackingList(){
+  if(!cart.length)return;
+  const total=cart.reduce((s,i)=>s+(i.price*i.qty),0);
+  const now=new Date();
+  const pedido='#'+Math.floor(Math.random()*900+1100);
+  const vendorName=selectedSellerId?VENDORS.find(v=>v.id===selectedSellerId)?.name||'':'';
+
+  const rowsHTML=cart.map(i=>`
+    <tr>
+      <td class="ref">${i.ref}</td>
+      <td class="name">${i.name}</td>
+      <td class="c">${i.qty}</td>
+      <td class="r">${fmt(i.price)}</td>
+      <td class="r total-cell">${fmt(i.price*i.qty)}</td>
+    </tr>`).join('');
+
+  const doc=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <title>Packing List ${pedido}</title>
+  <style>
+    @page{size:A4 portrait;margin:18mm 16mm 16mm 16mm;}
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{font-family:Arial,Helvetica,sans-serif;font-size:9.5pt;color:#111;background:#fff;}
+    /* HEADER */
+    .header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:10pt;border-bottom:2pt solid #111;margin-bottom:14pt;}
+    .brand{display:flex;flex-direction:column;gap:3pt;}
+    .brand-title{font-size:20pt;font-weight:700;letter-spacing:-0.5pt;line-height:1;}
+    .brand-sub{font-size:8pt;color:#555;}
+    .brand-vendor{font-size:8.5pt;color:#111;font-weight:700;margin-top:2pt;}
+    .meta{text-align:right;font-size:8pt;color:#555;line-height:1.7;}
+    .meta strong{color:#111;font-size:9pt;}
+    /* TABLE */
+    table{width:100%;border-collapse:collapse;margin-top:0;}
+    thead tr{border-bottom:1.5pt solid #111;}
+    th{padding:5pt 6pt;font-size:7.5pt;font-weight:700;text-transform:uppercase;letter-spacing:0.6pt;color:#444;}
+    th.r,td.r{text-align:right;}
+    th.c,td.c{text-align:center;}
+    td{padding:4pt 6pt;border-bottom:0.5pt dotted #bbb;vertical-align:middle;}
+    td.ref{font-size:8pt;color:#777;width:88pt;}
+    td.name{font-size:9pt;}
+    td.c{width:38pt;font-weight:600;}
+    td.r{width:76pt;}
+    td.total-cell{font-weight:700;width:84pt;}
+    tbody tr:last-child td{border-bottom:1.5pt solid #111;}
+    /* TOTAL */
+    .total-wrap{display:flex;justify-content:flex-end;margin-top:10pt;}
+    .total-box{border:2pt solid #111;padding:6pt 18pt;display:flex;align-items:center;gap:14pt;}
+    .total-label{font-size:9pt;font-weight:700;text-transform:uppercase;letter-spacing:0.5pt;color:#555;}
+    .total-value{font-size:16pt;font-weight:700;letter-spacing:-0.5pt;}
+    /* SUMMARY ROW */
+    .summary{font-size:8pt;color:#777;margin-top:6pt;text-align:right;}
+    /* SIGNATURES */
+    .sigs{display:grid;grid-template-columns:1fr 1fr;gap:40pt;margin-top:36pt;}
+    .sig-block{font-size:8.5pt;color:#555;}
+    .sig-title{margin-bottom:30pt;}
+    .sig-line{border-top:1pt solid #111;padding-top:5pt;font-size:8pt;color:#777;}
+    /* FOOTER */
+    .footer{margin-top:20pt;padding-top:8pt;border-top:0.5pt solid #ddd;font-size:7.5pt;color:#aaa;display:flex;justify-content:space-between;}
+  </style>
+  </head><body>
+  <div class="header">
+    <div class="brand">
+      <div class="brand-title">PACKING LIST</div>
+      <div class="brand-sub">AutoFlow PRO &mdash; Distribuidora Auto Silva</div>
+      ${vendorName?`<div class="brand-vendor">Vendedor: ${vendorName}</div>`:''}
+    </div>
+    <div class="meta">
+      <div>${now.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'})}&nbsp;&nbsp;${now.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div>
+      <div>Pedido <strong>${pedido}</strong></div>
+    </div>
+  </div>
+  <table>
+    <thead><tr>
+      <th>Referência</th>
+      <th>Produto / Descrição</th>
+      <th class="c">Qtd</th>
+      <th class="r">Unit.</th>
+      <th class="r">Total</th>
+    </tr></thead>
+    <tbody>${rowsHTML}</tbody>
+  </table>
+  <div class="summary">${cart.length} ${cart.length===1?'produto':'produtos'} &middot; ${cart.reduce((s,i)=>s+i.qty,0)} unidades no total</div>
+  <div class="total-wrap">
+    <div class="total-box">
+      <span class="total-label">Total</span>
+      <span class="total-value">${fmt(total)}</span>
+    </div>
+  </div>
+  <div class="sigs">
+    <div class="sig-block"><div class="sig-title">Recebido / Conferido por:</div><div class="sig-line">Assinatura &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data</div></div>
+    <div class="sig-block"><div class="sig-title">Separado / Expedido por:</div><div class="sig-line">Assinatura &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Data</div></div>
+  </div>
+  <div class="footer">
+    <span>Gerado por AutoFlow PRO</span>
+    <span>${now.toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'})}</span>
+  </div>
+  <script>window.onload=()=>{window.print();setTimeout(()=>window.close(),500);}<\/script>
+  </body></html>`;
+
+  // Abrir em janela nova isolada — sem a interface do sistema
+  const win=window.open('','_blank','width=820,height=700,menubar=no,toolbar=no,location=no,status=no');
+  if(win){win.document.write(doc);win.document.close();}
+  else{alert('Permita pop-ups para imprimir o Packing List.');}
+}
+
+function registerLost(id){const p=PRODUCTS.find(x=>x.id===id);if(!p)return;const r=prompt(`Venda Perdida: ${p.name}\n\nMotivo:`, 'Sem estoque');if(r!==null)alert('✅ Registrado! O Guardião foi notificado.');}
+
+// ═══ ORDER QUEUE ═══
+function renderOrders(){
+  const q=document.getElementById('orderQueue');if(!q)return;
+  if(!ORDERS.length){q.innerHTML=`<div style="text-align:center;padding:40px;color:var(--text-muted);grid-column:1/-1"><i class="fas fa-check-circle" style="font-size:40px;margin-bottom:12px;display:block;opacity:.2"></i>Fila limpa!</div>`;return;}
+  q.innerHTML=ORDERS.map(o=>{const cls=o.minutes>20?'urgent':o.minutes>10?'warn':'ok';const badge=o.minutes>20?'<span class="badge badge-danger">URGENTE</span>':o.minutes>10?'<span class="badge badge-warning">ATENÇÃO</span>':'<span class="badge badge-success">NOVO</span>';return `<div class="order-card ${cls}"><div class="order-header"><div><div class="order-id">${o.id}</div><div class="order-seller">${o.seller}</div></div><span class="order-timer ${cls}"><i class="fas fa-clock"></i> ${o.minutes} min</span></div><div class="order-items">${o.items.replace(/\n/g,'<br>')}</div><div class="order-footer">${badge}<button class="btn-complete" onclick="completeOrder(this,'${o.id}')">CONCLUIR ✅</button></div></div>`;}).join('');
+}
+function completeOrder(btn,id){const c=btn.closest('.order-card');c.style.transition='all .3s';c.style.opacity='0';c.style.transform='scale(.9)';setTimeout(()=>{c.remove();const i=ORDERS.findIndex(o=>o.id===id);if(i>-1)ORDERS.splice(i,1);},300);}
+
+// ═══ CSV ═══
+function handleCSV(evt){const file=evt.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{const lines=e.target.result.split('\n').filter(l=>l.trim());csvHeaders=lines[0].split(',').map(h=>h.trim().replace(/"/g,''));parsedCSV=lines.slice(1).map(l=>l.split(',').map(v=>v.trim().replace(/"/g,'')));buildMapper();document.getElementById('csvPane1').style.display='none';document.getElementById('csvPane2').style.display='block';document.getElementById('csvStep1').className='step done';document.getElementById('csvStep2').className='step active';csvStep=2;};reader.readAsText(file);}
+function buildMapper(){document.getElementById('colMapperRows').innerHTML=FIELDS.map(f=>`<div style="display:grid;grid-template-columns:140px 24px 1fr;gap:10px;align-items:center;margin-bottom:10px"><div style="font-size:13px;font-weight:600">${f}</div><i class="fas fa-arrow-right" style="color:var(--text-muted)"></i><select class="form-select" id="map_${f}"><option value="">— Ignorar —</option>${csvHeaders.map((h,i)=>`<option value="${i}" ${h.toLowerCase().includes(f.toLowerCase())?'selected':''}>${h}</option>`).join('')}</select></div>`).join('');}
+function csvNext(){
+  if(csvStep===1)return;
+  if(csvStep===2){const nome=document.getElementById('map_Nome')?.value;if(!nome){document.getElementById('validationMsg').innerHTML='<div class="validation-msg error"><i class="fas fa-times-circle"></i> Campo <strong>Nome</strong> obrigatório.</div>';return;}document.getElementById('validationMsg').innerHTML='';const rows=parsedCSV.filter(r=>r[nome]&&r[nome].trim());const empty=parsedCSV.length-rows.length;document.getElementById('validCount').textContent=`${rows.length} itens`;document.getElementById('csvPreviewTable').innerHTML=`${empty>0?`<div class="validation-msg error" style="margin-bottom:10px"><i class="fas fa-exclamation-circle"></i> ${empty} linhas ignoradas.</div>`:''}<table><thead><tr><th>Nome</th><th>Custo</th><th>Preço</th><th>Qtd</th></tr></thead><tbody>${rows.slice(0,6).map(r=>`<tr><td>${r[nome]||'—'}</td><td>${r[document.getElementById('map_Custo')?.value]||'—'}</td><td>${r[document.getElementById('map_Preco_Venda')?.value]||'—'}</td><td>${r[document.getElementById('map_Quantidade')?.value]||'—'}</td></tr>`).join('')}</tbody></table>${rows.length>6?`<p style="font-size:12px;color:var(--text-muted);text-align:center;margin-top:8px">...e mais ${rows.length-6} itens</p>`:''}`; document.getElementById('csvPane2').style.display='none';document.getElementById('csvPane3').style.display='block';document.getElementById('csvStep2').className='step done';document.getElementById('csvStep3').className='step active';document.getElementById('csvNextBtn').textContent='✅ Confirmar';csvStep=3;return;}
+  if(csvStep===3){closeModal('csvModal');confetti({particleCount:80,spread:60,origin:{y:.5}});alert('✅ Importado!');csvStep=1;['csvPane1','csvPane2','csvPane3'].forEach((id,i)=>{document.getElementById(id).style.display=i===0?'block':'none';});['csvStep1','csvStep2','csvStep3'].forEach((id,i)=>{document.getElementById(id).className=i===0?'step active':'step';});document.getElementById('csvNextBtn').textContent='Próximo →';}
+}
+
+// ═══ XML ═══
+function handleXML(evt){const file=evt.target.files[0];if(!file)return;const reader=new FileReader();reader.onload=e=>{try{const xml=new DOMParser().parseFromString(e.target.result,'text/xml');const prods=xml.querySelectorAll('prod');xmlItems=prods.length>0?Array.from(prods).map(p=>({nome:p.querySelector('xProd')?.textContent||'?',qty:parseFloat(p.querySelector('qCom')?.textContent||0),oldCost:Math.round(Math.random()*100+20),newCost:parseFloat(p.querySelector('vUnCom')?.textContent||0)})):XML_DEMO;}catch(e){xmlItems=XML_DEMO;}showXMLPreview();};reader.readAsText(file);}
+function showXMLPreview(){if(!xmlItems.length)xmlItems=XML_DEMO;document.getElementById('xmlPane1').style.display='none';document.getElementById('xmlPane2').style.display='block';document.getElementById('xmlStep2').className='step active';document.getElementById('xmlNextBtn').textContent='Confirmar ✅';document.getElementById('xmlPreviewBody').innerHTML=xmlItems.map(i=>{const diff=i.newCost-i.oldCost;const pct=i.oldCost>0?((diff/i.oldCost)*100).toFixed(1):0;const cls=diff>0?'price-up':diff<0?'price-down':'price-same';return`<tr><td><strong>${i.nome}</strong></td><td style="text-align:center">${i.qty}</td><td style="font-family:'DM Mono',monospace">${fmt(i.oldCost)}</td><td style="font-family:'DM Mono',monospace" class="${cls}">${fmt(i.newCost)}</td><td class="${cls}">${diff>0?'↑':diff<0?'↓':'→'} ${Math.abs(pct)}%</td></tr>`;}).join('');xmlStep=2;}
+function xmlNext(){if(xmlStep===1){xmlItems=XML_DEMO;showXMLPreview();return;}if(xmlStep===2){closeModal('xmlModal');confetti({particleCount:100,spread:70,origin:{y:.5}});alert(`✅ ${xmlItems.length} itens atualizados!`);document.getElementById('xmlPane1').style.display='block';document.getElementById('xmlPane2').style.display='none';document.getElementById('xmlStep2').className='step';document.getElementById('xmlNextBtn').textContent='Processar XML →';xmlStep=1;}}
+// ═══ VENDAS HOJE ═══
+function updateVendasHojeBadge(){
+  const active=SALES_TODAY.filter(s=>s.status==='ok');
+  const b=document.getElementById('vendasHojeBadge');
+  if(b){b.textContent=active.length;b.style.display=active.length>0?'inline':'none';}
+}
+function renderVendasHojeFilter(){
+  const sel=document.getElementById('filterVendasVendedor');if(!sel)return;
+  const cur=sel.value;
+  sel.innerHTML='<option value="">Todos os vendedores</option>'+VENDORS.map(v=>`<option value="${v.id}">${v.name}</option>`).join('');
+  sel.value=cur;
+}
+function renderVendasHoje(){
+  const filterV=document.getElementById('filterVendasVendedor')?.value||'';
+  const list=SALES_TODAY.filter(s=>!filterV||s.sellerId===filterV);
+  // KPIs
+  const vendidas=list.filter(s=>s.status==='ok');
+  const estornadas=list.filter(s=>s.status==='estornada');
+  const totalVal=vendidas.reduce((s,v)=>s+v.total,0);
+  const totalComm=vendidas.reduce((s,v)=>s+v.comm,0);
+  const kpis=document.getElementById('vendasHojeKpis');
+  if(kpis) kpis.innerHTML=`
+    <div class="kpi-card"><div class="kpi-label">Vendas Realizadas</div><div class="kpi-value">${vendidas.length}</div><div class="kpi-sub">pedidos finalizados</div><div class="kpi-icon"><i class="fas fa-check-circle"></i></div></div>
+    <div class="kpi-card info"><div class="kpi-label">Faturamento do Dia</div><div class="kpi-value" style="font-size:20px">${fmt(totalVal)}</div><div class="kpi-sub">somente vendas ok</div><div class="kpi-icon"><i class="fas fa-chart-line"></i></div></div>
+    <div class="kpi-card"><div class="kpi-label">Comissões Geradas</div><div class="kpi-value" style="font-size:20px">${fmt(totalComm)}</div><div class="kpi-sub">a pagar aos vendedores</div><div class="kpi-icon"><i class="fas fa-coins"></i></div></div>
+    <div class="kpi-card ${estornadas.length>0?'danger':''}"><div class="kpi-label">Estornadas</div><div class="kpi-value ${estornadas.length>0?'danger':''}">${estornadas.length}</div><div class="kpi-sub">devoluções do dia</div><div class="kpi-icon"><i class="fas fa-undo"></i></div></div>`;
+  // total display
+  const td=document.getElementById('vendasHojeTotal');if(td)td.textContent=fmt(totalVal);
+  // table
+  const tbody=document.getElementById('vendasHojeTbody');if(!tbody)return;
+  if(!list.length){tbody.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:40px;color:var(--text-muted)"><i class="fas fa-receipt" style="font-size:32px;opacity:.15;display:block;margin-bottom:12px"></i>Nenhuma venda registrada hoje</td></tr>`;return;}
+  tbody.innerHTML=list.map(s=>{
+    const isOk=s.status==='ok';
+    const itemsText=s.items.map(i=>`${i.qty}× ${i.name}`).join(', ');
+    const itemsShort=itemsText.length>55?itemsText.slice(0,55)+'…':itemsText;
+    return `<tr style="${!isOk?'opacity:.55;':''}">
+      <td><strong style="font-family:'DM Mono',monospace;font-size:12px">${s.id}</strong></td>
+      <td style="font-family:'DM Mono',monospace;font-size:12px;color:var(--text-muted)">${s.time}</td>
+      <td><strong>${s.sellerName}</strong></td>
+      <td style="font-size:12px;color:var(--text-secondary);max-width:240px" title="${itemsText}">${itemsShort}</td>
+      <td style="font-family:'DM Mono',monospace;font-weight:700;white-space:nowrap">${fmt(s.total)}</td>
+      <td style="font-family:'DM Mono',monospace;color:var(--teal);font-size:12px">${fmt(s.comm)}</td>
+      <td>
+        <span class="badge ${isOk?'badge-success':'badge-danger'}">${isOk?'✅ Concluída':'↩️ Estornada'}</span>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══ VENDEDORES ═══
+function renderVendedores(){
+  const tbody=document.getElementById('vendedoresTbody');if(!tbody)return;
+  const typeLabel={percent:'% s/ venda',fixed:'R$ fixo',margin:'% margem',tiered:'Escalonada'};
+  const roleLabel={seller:'Vendedor',stock:'Estoquista',manager:'Gestor'};
+  tbody.innerHTML=VENDORS.map(v=>{
+    const pct=Math.round((v.monthSales/v.metaMonthly)*100);
+    const pctColor=pct>=100?'var(--success)':pct>=70?'var(--warning)':'var(--danger)';
+    return `<tr>
+      <td><strong>${v.name}</strong></td>
+      <td style="font-size:12px;color:var(--text-muted)">${v.alias||'—'}</td>
+      <td><span class="badge badge-neutral">${typeLabel[v.commType]||v.commType} ${v.commPct}%</span></td>
+      <td style="font-family:'DM Mono',monospace">${fmt(v.metaMonthly)}</td>
+      <td style="font-family:'DM Mono',monospace">${fmt(v.monthSales)}</td>
+      <td><span style="font-weight:700;color:${pctColor}">${pct}%</span>
+        <div style="height:4px;background:var(--border);border-radius:2px;margin-top:3px;width:70px"><div style="height:4px;background:${pctColor};border-radius:2px;width:${Math.min(100,pct)}%"></div></div>
+      </td>
+      <td><span class="badge badge-neutral">${roleLabel[v.role||'seller']}</span></td>
+      <td>
+        <div style="display:flex;gap:5px">
+          <button class="btn btn-ghost btn-xs" onclick="openEditVendor('${v.id}')" title="Editar"><i class="fas fa-edit" style="color:var(--info)"></i></button>
+          <button class="btn btn-ghost btn-xs" onclick="removeVendor('${v.id}')" title="Remover"><i class="fas fa-user-minus" style="color:var(--danger)"></i></button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function openEditVendor(id){
+  const v=VENDORS.find(x=>x.id===id);if(!v)return;
+  document.getElementById('nv_name').value=v.name;
+  document.getElementById('nv_alias').value=v.alias||'';
+  document.getElementById('nv_phone').value=v.phone||'';
+  document.getElementById('nv_email').value=v.email||'';
+  document.getElementById('nv_commType').value=v.commType;
+  document.getElementById('nv_commPct').value=v.commPct;
+  document.getElementById('nv_meta').value=v.metaMonthly;
+  document.getElementById('nv_metaDaily').value=v.metaDaily;
+  document.getElementById('nv_bonus').value=v.bonus;
+  // swap button to "Salvar Edição"
+  const btn=document.querySelector('#addVendorModal .modal-footer .btn-primary');
+  if(btn){btn.innerHTML='<i class="fas fa-save"></i> Salvar Edição';btn.onclick=()=>saveEditVendor(id);}
+  openModal('addVendorModal');
+}
+
+function saveEditVendor(id){
+  const v=VENDORS.find(x=>x.id===id);if(!v)return;
+  const name=document.getElementById('nv_name').value.trim();
+  if(!name){document.getElementById('nv_validation').innerHTML='<div class="validation-msg error">Nome obrigatório.</div>';return;}
+  v.name=name;v.alias=document.getElementById('nv_alias').value;
+  v.commType=document.getElementById('nv_commType').value;v.commPct=parseFloat(document.getElementById('nv_commPct').value)||v.commPct;
+  v.metaMonthly=parseFloat(document.getElementById('nv_meta').value)||v.metaMonthly;
+  v.metaDaily=parseFloat(document.getElementById('nv_metaDaily').value)||v.metaDaily;
+  v.bonus=parseFloat(document.getElementById('nv_bonus').value)||v.bonus;
+  closeModal('addVendorModal');renderVendedores();renderSellerChips();renderCommissionExtract();renderVendorRules();
+  // reset button
+  const btn=document.querySelector('#addVendorModal .modal-footer .btn-primary');
+  if(btn){btn.innerHTML='<i class="fas fa-user-plus"></i> Cadastrar';btn.onclick=addVendor;}
+  alert(`✅ Vendedor "${name}" atualizado!`);
+}
+
+function removeVendor(id){
+  const v=VENDORS.find(x=>x.id===id);if(!v)return;
+  if(!confirm(`Remover "${v.name}" da equipe?\n\nAs vendas históricas serão mantidas nos registros.`))return;
+  VENDORS=VENDORS.filter(x=>x.id!==id);
+  renderVendedores();renderSellerChips();renderCommissionExtract();renderVendorRules();
+  alert(`✅ Vendedor "${v.name}" removido.`);
+}
+
+// ═══ SEARCH & EDIT SALES ═══
+function searchSales(query){
+  const container=document.getElementById('saleSearchResults');if(!container)return;
+  let list;
+  if(query==='__all__'||query===''){
+    list=[...SALES_TODAY];
+    if(query===''&&document.getElementById('saleSearchInput').value===''){
+      container.innerHTML=`<div style="text-align:center;padding:36px;color:var(--text-muted)"><i class="fas fa-search" style="font-size:36px;opacity:.15;display:block;margin-bottom:12px"></i><div style="font-size:13px">Digite o código ou nome do vendedor</div></div>`;
+      return;
+    }
+  } else {
+    const q=query.toLowerCase();
+    list=SALES_TODAY.filter(s=>s.id.toLowerCase().includes(q)||s.sellerName.toLowerCase().includes(q));
+  }
+  if(!list.length){container.innerHTML=`<div style="text-align:center;padding:28px;color:var(--text-muted)"><i class="fas fa-inbox" style="font-size:28px;opacity:.2;display:block;margin-bottom:8px"></i>Nenhuma venda encontrada</div>`;return;}
+  container.innerHTML=`<div style="display:flex;flex-direction:column;gap:10px">`+list.map(s=>{
+    const isOk=s.status==='ok';
+    return `<div style="border:1px solid var(--border);border-radius:10px;padding:14px;background:${isOk?'var(--surface)':'rgba(239,68,68,.03)'}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:12px">
+          <strong style="font-family:'DM Mono',monospace;font-size:13px">${s.id}</strong>
+          <span style="font-size:12px;color:var(--text-muted)">${s.time}</span>
+          <span class="badge ${isOk?'badge-success':'badge-danger'}">${isOk?'✅ Concluída':'↩️ Estornada'}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          ${isOk?`<button class="btn btn-ghost btn-sm" onclick="openEditSale('${s.id}')"><i class="fas fa-edit" style="color:var(--warning)"></i> Editar</button>
+          <button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="quickEstorno('${s.id}')"><i class="fas fa-undo"></i> Estornar</button>`:'<span style="font-size:12px;color:var(--text-muted);padding:4px 8px">Já estornada</span>'}
+        </div>
+      </div>
+      <div style="display:flex;gap:20px;align-items:center">
+        <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Vendedor</div><div style="font-size:13px;font-weight:600">${s.sellerName}</div></div>
+        <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Total</div><div style="font-size:13px;font-weight:700;font-family:'DM Mono',monospace">${fmt(s.total)}</div></div>
+        <div><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Comissão</div><div style="font-size:13px;font-weight:600;color:var(--teal);font-family:'DM Mono',monospace">${fmt(s.comm)}</div></div>
+        <div style="flex:1"><div style="font-size:11px;color:var(--text-muted);margin-bottom:2px">Itens</div><div style="font-size:12px;color:var(--text-secondary)">${s.items.map(i=>`${i.qty}× ${i.name} (${fmt(i.price)})`).join(' · ')}</div></div>
+      </div>
+    </div>`;
+  }).join('')+'</div>';
+}
+
+let editingSaleId=null;
+function openEditSale(id){
+  const s=SALES_TODAY.find(x=>x.id===id);if(!s)return;
+  editingSaleId=id;
+  document.getElementById('es_id').value=id;
+  document.getElementById('editSaleIdLabel').textContent=id;
+  // populate seller dropdown
+  const selSel=document.getElementById('es_seller');
+  selSel.innerHTML=VENDORS.map(v=>`<option value="${v.id}" ${v.id===s.sellerId?'selected':''}>${v.name}</option>`).join('');
+  document.getElementById('es_status').value=s.status;
+  // items
+  renderEditSaleItems(s);
+  document.getElementById('es_validation').innerHTML='';
+  openModal('editSaleModal');
+}
+
+function renderEditSaleItems(s){
+  const wrap=document.getElementById('es_items_wrap');if(!wrap)return;
+  wrap.innerHTML=s.items.map((item,idx)=>`
+    <div style="display:grid;grid-template-columns:1fr 90px 90px 36px;gap:8px;align-items:end;margin-bottom:10px" id="es_item_${idx}">
+      <div><label class="form-label">Produto</label><input class="form-input" id="es_item_name_${idx}" value="${item.name}" oninput="recalcSaleTotal()"></div>
+      <div><label class="form-label">Qtd</label><input class="form-input" type="number" min="1" id="es_item_qty_${idx}" value="${item.qty}" oninput="recalcSaleTotal()"></div>
+      <div><label class="form-label">Preço Unit.</label><input class="form-input" type="number" id="es_item_price_${idx}" value="${item.price}" oninput="recalcSaleTotal()"></div>
+      <button class="btn btn-ghost btn-xs" style="height:38px;align-self:flex-end;color:var(--danger)" onclick="removeEditSaleItem(${idx})" title="Remover item"><i class="fas fa-times"></i></button>
+    </div>`).join('');
+  recalcSaleTotal();
+}
+
+function removeEditSaleItem(idx){
+  document.getElementById('es_item_'+idx)?.remove();
+  recalcSaleTotal();
+}
+
+function recalcSaleTotal(){
+  let total=0;
+  let i=0;
+  while(document.getElementById('es_item_qty_'+i)!==null){
+    const qty=parseFloat(document.getElementById('es_item_qty_'+i)?.value||0);
+    const price=parseFloat(document.getElementById('es_item_price_'+i)?.value||0);
+    total+=qty*price;i++;
+  }
+  document.getElementById('es_total_preview').textContent=fmt(total);
+}
+
+function saveEditSale(){
+  const s=SALES_TODAY.find(x=>x.id===editingSaleId);if(!s)return;
+  const sellerId=document.getElementById('es_seller').value;
+  const newVendor=VENDORS.find(v=>v.id===sellerId);
+  // collect items
+  const newItems=[];
+  let i=0;
+  while(document.getElementById('es_item_name_'+i)!==null){
+    const name=document.getElementById('es_item_name_'+i)?.value||'';
+    const qty=parseFloat(document.getElementById('es_item_qty_'+i)?.value||0);
+    const price=parseFloat(document.getElementById('es_item_price_'+i)?.value||0);
+    if(name&&qty>0&&price>0)newItems.push({name,ref:s.items[i]?.ref||'—',qty,price});
+    i++;
+  }
+  if(!newItems.length){document.getElementById('es_validation').innerHTML='<div class="validation-msg error">A venda precisa ter pelo menos um item.</div>';return;}
+  const newTotal=newItems.reduce((acc,item)=>acc+(item.qty*item.price),0);
+  s.sellerId=sellerId;
+  s.sellerName=newVendor?newVendor.name:s.sellerName;
+  s.items=newItems;
+  s.total=newTotal;
+  s.comm=newVendor?newTotal*(newVendor.commPct/100):s.comm;
+  s.status=document.getElementById('es_status').value;
+  closeModal('editSaleModal');
+  renderVendasHoje();searchSales(document.getElementById('saleSearchInput')?.value||'__all__');
+  confetti({particleCount:50,spread:40,origin:{y:.5}});
+  alert(`✅ Venda ${s.id} atualizada com sucesso!`);
+}
+
+function quickEstorno(id){
+  editingSaleId=id;
+  const s=SALES_TODAY.find(x=>x.id===id);if(!s)return;
+  document.getElementById('estornoDetails').innerHTML=`
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Código</span><strong>${s.id}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Vendedor</span><strong>${s.sellerName}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Total</span><strong style="font-family:'DM Mono',monospace">${fmt(s.total)}</strong></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text-muted)">Comissão a descontar</span><strong style="color:var(--danger);font-family:'DM Mono',monospace">−${fmt(s.comm)}</strong></div>
+    </div>`;
+  document.getElementById('estornoMotivo').value='';
+  openModal('estornoModal');
+}
+
+function confirmEstorno(){
+  const s=SALES_TODAY.find(x=>x.id===editingSaleId);if(!s)return;
+  closeModal('editSaleModal');
+  quickEstorno(editingSaleId);
+}
+
+function executeEstorno(){
+  const motivo=document.getElementById('estornoMotivo').value;
+  if(!motivo){alert('Selecione o motivo do estorno.');return;}
+  const s=SALES_TODAY.find(x=>x.id===editingSaleId);if(!s)return;
+  s.status='estornada';
+  // revert vendor stats
+  const v=VENDORS.find(x=>x.id===s.sellerId);
+  if(v){v.todaySales=Math.max(0,v.todaySales-s.total);v.todayComm=Math.max(0,v.todayComm-s.comm);v.monthSales=Math.max(0,v.monthSales-s.total);v.monthComm=Math.max(0,v.monthComm-s.comm);}
+  closeModal('estornoModal');
+  renderVendasHoje();searchSales(document.getElementById('saleSearchInput')?.value||'__all__');
+  updateVendasHojeBadge();
+  alert(`↩️ Venda ${s.id} estornada.\nMotivo: ${motivo}`);
+}
+
+document.getElementById('xmlNextBtn').addEventListener('click',()=>{if(xmlStep===1&&!xmlItems.length){xmlItems=XML_DEMO;showXMLPreview();}});
+
+// ═══ INTEGRAÇÕES ═══
+let modoOperacao = 'autonomo';
+
+function selectModoOperacao(el, modo) {
+  document.querySelectorAll('.integ-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  modoOperacao = modo;
+
+  // update status badges
+  document.querySelectorAll('.integ-card-status').forEach(s => {
+    s.classList.remove('active');
+    s.innerHTML = '<i class="fas fa-circle" style="font-size:8px"></i> Inativo';
+  });
+  el.querySelector('.integ-card-status').classList.add('active');
+  el.querySelector('.integ-card-status').innerHTML = '<i class="fas fa-check-circle"></i> Modo Atual';
+
+  const title = document.getElementById('configConexaoTitle');
+  const body = document.getElementById('configConexaoBody');
+
+  if (modo === 'autonomo') {
+    title.innerHTML = '<i class="fas fa-leaf" style="color:var(--success);margin-right:8px"></i>Modo Autônomo Ativo';
+    body.innerHTML = `
+      <div style="background:rgba(16,185,129,.06);border:1px solid rgba(16,185,129,.2);border-radius:10px;padding:16px;margin-bottom:16px">
+        <div style="font-size:13px;font-weight:700;color:var(--success);margin-bottom:6px">✅ Nenhuma configuração necessária</div>
+        <div style="font-size:13px;color:var(--text-secondary);line-height:1.6">O sistema opera de forma totalmente autônoma. Dados gerenciados via importação de CSV, XML de NF-e fornecedor e cadastro manual.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        ${['Importação de CSV / Planilha Excel','Importação de XML NF-e do fornecedor','Adição manual de produtos e ajuste de estoque','Espelho de NF para contador (PDF com um clique)'].map(t=>`<div style="display:flex;align-items:center;gap:10px;padding:10px;background:var(--surface-2);border-radius:8px;font-size:13px"><i class="fas fa-check-circle" style="color:var(--success)"></i><span>${t}</span></div>`).join('')}
+      </div>`;
+    document.getElementById('syncStatusBadge').textContent = 'Operando';
+    document.getElementById('syncStatusBadge').className = 'badge badge-success';
+  }
+
+  if (modo === 'bling' || modo === 'tiny') {
+    const label = modo === 'bling' ? 'Bling' : 'Tiny (Olist)';
+    const icon = modo === 'bling' ? 'var(--info)' : '#7C3AED';
+    title.innerHTML = `<i class="fas fa-link" style="color:${icon};margin-right:8px"></i>Configurar Integração — ${label}`;
+    body.innerHTML = `
+      <div style="background:rgba(59,130,246,.05);border:1px solid rgba(59,130,246,.2);border-radius:10px;padding:14px;margin-bottom:16px;font-size:13px;color:var(--text-secondary);line-height:1.6">
+        <strong style="color:var(--info)">Como conectar:</strong> Acesse o painel do ${label} → Configurações → API → Gerar nova chave. Cole abaixo com permissões de <strong>Leitura</strong> e <strong>Escrita</strong> em Produtos, Pedidos e Estoque.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="form-group">
+          <label class="form-label">API Key do ${label} *</label>
+          <input class="form-input" type="password" placeholder="Cole aqui sua chave de API..." id="erp_api_key">
+          <div class="form-hint">Sua chave fica armazenada com segurança e nunca aparece na tela.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Prefixo do Pedido no ${label}</label>
+          <input class="form-input" placeholder="Ex: VND, RQ, OS, PED..." id="erp_prefix" value="VND">
+          <div class="form-hint">Código que aparece antes do número (ex: VND-1042 ou RQ-1042).</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Depósito de Estoque</label>
+          <select class="form-select" id="erp_deposito">
+            <option>Geral</option><option>Loja Física</option><option>Depósito 01</option><option>Outro</option>
+          </select>
+          <div class="form-hint">Informe de qual depósito o ${label} deve baixar o estoque ao finalizar venda.</div>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="testarConexaoERP('${modo}')"><i class="fas fa-plug"></i> Testar Conexão</button>
+          <button class="btn btn-ghost" onclick="salvarConexaoERP('${modo}')"><i class="fas fa-save"></i> Salvar</button>
+        </div>
+        <div id="erp_test_result"></div>
+      </div>`;
+    document.getElementById('syncStatusBadge').textContent = 'Aguardando configuração';
+    document.getElementById('syncStatusBadge').className = 'badge badge-warning';
+  }
+}
+
+function testarConexaoERP(modo) {
+  const key = document.getElementById('erp_api_key')?.value;
+  const res = document.getElementById('erp_test_result');
+  if (!key) { res.innerHTML = '<div class="validation-msg error"><i class="fas fa-times-circle"></i> Insira a API Key antes de testar.</div>'; return; }
+  res.innerHTML = '<div class="validation-msg" style="background:rgba(59,130,246,.06);border-color:rgba(59,130,246,.2);color:var(--info)"><i class="fas fa-spinner fa-spin"></i> Testando conexão...</div>';
+  setTimeout(() => {
+    // Demo: simula sucesso
+    res.innerHTML = '<div class="validation-msg success"><i class="fas fa-check-circle"></i> <strong>Conexão bem-sucedida!</strong> 6 produtos encontrados no catálogo. Pronto para sincronizar.</div>';
+    document.getElementById('syncStatusBadge').textContent = 'Conectado';
+    document.getElementById('syncStatusBadge').className = 'badge badge-success';
+  }, 1800);
+}
+
+function salvarConexaoERP(modo) {
+  const key = document.getElementById('erp_api_key')?.value;
+  if (!key) { alert('Insira a API Key antes de salvar.'); return; }
+  confetti({particleCount:60,spread:50,origin:{y:.4}});
+  alert(`✅ Integração com ${modo === 'bling' ? 'Bling' : 'Tiny'} configurada!\n\nNo sistema real, isso salvaria a chave com criptografia e iniciaria a primeira sincronização de produtos.`);
+}
+
+// ═══ ESPELHO DE NF ═══
+function gerarEspelhoNF(periodo) {
+  const hoje = new Date();
+  const dataStr = hoje.toLocaleDateString('pt-BR');
+  const vendasOK = SALES_TODAY.filter(s => s.status === 'ok');
+  const totalGeral = vendasOK.reduce((s, v) => s + v.total, 0);
+  const totalComm = vendasOK.reduce((s, v) => s + v.comm, 0);
+
+  // Expand items para tabela
+  const allItems = {};
+  vendasOK.forEach(v => {
+    v.items.forEach(item => {
+      const key = item.ref || item.name;
+      if (allItems[key]) {
+        allItems[key].qty += item.qty;
+        allItems[key].subtotal += item.qty * item.price;
+      } else {
+        allItems[key] = { name: item.name, ref: item.ref || '—', price: item.price, qty: item.qty, subtotal: item.qty * item.price };
+      }
+    });
+  });
+
+  const linhasItens = Object.values(allItems).map((item, i) => `
+    <tr style="background:${i%2===0?'#fff':'#f8fafb'}">
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;font-family:monospace;font-size:12px">${item.ref}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;font-size:13px">${item.name}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:center">${item.qty}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-family:monospace">${fmt(item.price)}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-family:monospace;font-weight:700">${fmt(item.subtotal)}</td>
+    </tr>`).join('');
+
+  const linhasVendas = vendasOK.map((v, i) => `
+    <tr style="background:${i%2===0?'#fff':'#f8fafb'}">
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;font-family:monospace;font-size:12px">${v.id}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0">${v.time}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0">${v.sellerName}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;font-size:12px">${v.items.map(it=>it.qty+'× '+it.name).join(', ').substring(0,60)}${v.items.map(it=>it.name).join(', ').length>60?'…':''}</td>
+      <td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;text-align:right;font-family:monospace;font-weight:700">${fmt(v.total)}</td>
+    </tr>`).join('');
+
+  const html = `<!DOCTYPE html><html lang="pt-br"><head><meta charset="UTF-8">
+<title>Espelho NF — ${dataStr}</title>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:Arial,sans-serif;color:#0d1b2a;padding:24px;font-size:13px;}
+  @page{size:A4 portrait;margin:18mm 16mm;}
+  .header{border-bottom:3px solid #00897b;padding-bottom:16px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start;}
+  .empresa{font-size:20px;font-weight:700;color:#00695c;}
+  .doc-title{font-size:14px;font-weight:700;color:#64748b;text-align:right;}
+  .doc-info{font-size:12px;color:#94a3b8;text-align:right;margin-top:4px;}
+  .aviso{background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:12px;color:#92400e;}
+  h3{font-size:13px;font-weight:700;color:#0d1b2a;margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid #e2e8f0;text-transform:uppercase;letter-spacing:.5px;}
+  table{width:100%;border-collapse:collapse;margin-bottom:20px;}
+  thead th{background:#0f1923;color:#fff;padding:9px 12px;text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.6px;}
+  thead th:last-child{text-align:right;}
+  thead th:nth-child(3){text-align:center;}
+  thead th:nth-child(4){text-align:right;}
+  .totals{background:#f0f4f7;border-radius:8px;padding:14px 18px;display:flex;justify-content:space-between;margin-bottom:20px;}
+  .total-item{text-align:center;}
+  .total-label{font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+  .total-value{font-size:18px;font-weight:700;color:#00695c;font-family:monospace;}
+  .footer{margin-top:30px;padding-top:16px;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;font-size:11px;color:#94a3b8;}
+  .assinatura{border-top:1px solid #0d1b2a;width:220px;text-align:center;padding-top:6px;font-size:11px;margin-top:40px;}
+</style></head><body>
+<div class="header">
+  <div><div class="empresa">Distribuidora Auto Silva</div><div style="font-size:12px;color:#64748b;margin-top:4px">CNPJ: 12.345.678/0001-99 · Curitiba/PR</div></div>
+  <div><div class="doc-title">ESPELHO DE NOTA FISCAL</div><div class="doc-info">Data: ${dataStr}</div><div class="doc-info">Período: ${periodo === 'diario' ? 'Fechamento do Dia' : 'Fechamento Mensal'}</div><div class="doc-info">Gerado pelo AutoFlow PRO</div></div>
+</div>
+
+<div class="aviso">
+  ⚠️ <strong>Documento auxiliar — não tem valor fiscal.</strong> Use este relatório para repassar ao seu contador ou como base para emissão das Notas Fiscais no sistema oficial (SEFAZ ou ERP).
+</div>
+
+<h3>Resumo do ${periodo === 'diario' ? 'Dia' : 'Mês'}</h3>
+<div class="totals">
+  <div class="total-item"><div class="total-label">Vendas Realizadas</div><div class="total-value">${vendasOK.length}</div></div>
+  <div class="total-item"><div class="total-label">Faturamento Total</div><div class="total-value" style="font-size:22px">${fmt(totalGeral)}</div></div>
+  <div class="total-item"><div class="total-label">Comissões Geradas</div><div class="total-value" style="color:#f59e0b">${fmt(totalComm)}</div></div>
+  <div class="total-item"><div class="total-label">Ticket Médio</div><div class="total-value" style="color:#3b82f6">${vendasOK.length > 0 ? fmt(totalGeral/vendasOK.length) : 'R$ 0,00'}</div></div>
+</div>
+
+<h3>Itens Vendidos — Consolidado por Produto</h3>
+<table>
+  <thead><tr><th>Ref.</th><th>Produto</th><th>Qtd Total</th><th>Preço Unit.</th><th style="text-align:right">Subtotal</th></tr></thead>
+  <tbody>${linhasItens}</tbody>
+  <tfoot><tr style="background:#e0f2f1"><td colspan="4" style="padding:10px 12px;font-weight:700;text-align:right">TOTAL GERAL</td><td style="padding:10px 12px;font-weight:700;text-align:right;font-family:monospace;font-size:15px;color:#00695c">${fmt(totalGeral)}</td></tr></tfoot>
+</table>
+
+<h3>Registro de Vendas do Dia</h3>
+<table>
+  <thead><tr><th>Código</th><th>Hora</th><th>Vendedor</th><th>Descrição</th><th style="text-align:right">Total</th></tr></thead>
+  <tbody>${linhasVendas}</tbody>
+</table>
+
+<div class="footer">
+  <div>Gerado pelo AutoFlow PRO em ${new Date().toLocaleString('pt-BR')} · Para uso contábil interno</div>
+  <div>Página 1 de 1</div>
+</div>
+
+<div style="display:flex;gap:60px;margin-top:20px">
+  <div class="assinatura">Responsável pela loja</div>
+  <div class="assinatura">Visto do Contador</div>
+</div>
+
+<script>window.onload=()=>{window.print();setTimeout(()=>window.close(),800);}<\/script>
+</body></html>`;
+
+  const win = window.open('', '_blank', 'width=860,height=720,menubar=no,toolbar=no,location=no');
+  if (!win) { alert('Pop-up bloqueado pelo navegador. Permita pop-ups para este site e tente novamente.'); return; }
+  win.document.write(html);
+  win.document.close();
+}
+
+function enviarContadorWhatsApp() {
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  const vendasOK = SALES_TODAY.filter(s => s.status === 'ok');
+  const total = vendasOK.reduce((s, v) => s + v.total, 0);
+  const msg = encodeURIComponent(
+    `📊 *Fechamento do dia ${hoje}*
+
+` +
+    `🏪 *Distribuidora Auto Silva*
+
+` +
+    `✅ Vendas realizadas: *${vendasOK.length}*
+` +
+    `💰 Faturamento: *${fmt(total)}*
+
+` +
+    `Segue em anexo o Espelho de NF para lançamento. PDF gerado pelo AutoFlow PRO.
+
+` +
+    `_Enviado automaticamente pelo sistema_`
+  );
+  window.open(`https://wa.me/5541999990000?text=${msg}`, '_blank');
+}
+
+function navigate_integracoes_update(view) {
+  if (view === 'integracoes') {
+    document.getElementById('syncProdCount').textContent = PRODUCTS.length;
+    document.getElementById('syncSaleCount').textContent = SALES_TODAY.filter(s=>s.status==='ok').length;
+  }
+}
+
+
+</script>
+</body>
+</html>
